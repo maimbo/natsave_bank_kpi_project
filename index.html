@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Natsave Bank KPI Dashboard</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- External CSS -->
+    <link rel="stylesheet" href="css/styles.css">
+
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- CDNs -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+</head>
+
+<body>
+    <div id="app" v-cloak>
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <span class="brand-accent">NAT</span>SAVE <span
+                    style="font-weight:300; margin-left:8px; font-size:0.8em; opacity:0.8;">KPIs</span>
+            </div>
+            <ul class="nav-menu">
+                <!-- Section: Overview -->
+                <li class="nav-section-header">OVERVIEW</li>
+
+                <!-- Dashboard -->
+                <li class="nav-item">
+                    <a href="#" class="nav-link" :class="{ 'active': currentView === 'dashboard' }"
+                        @click.prevent="setView('dashboard')">
+                        <i data-lucide="layout-dashboard"></i>
+                        Dashboard
+                    </a>
+                </li>
+
+                <!-- Section: KPI Categories -->
+                <li class="nav-section-header">KPI CATEGORIES</li>
+
+                <!-- Financial Performance -->
+                <li class="nav-item">
+                    <a href="#" class="nav-link" @click.prevent="toggleMenu('financial')">
+                        <i data-lucide="dollar-sign"></i>
+                        Financial Performance
+                        <i :data-lucide="expandedMenus.financial ? 'chevron-down' : 'chevron-right'" class="ml-auto"
+                            style="width: 16px; height: 16px;"></i>
+                    </a>
+                    <ul v-if="expandedMenus.financial" class="sub-menu">
+                        <li><a href="dashboards/roa-roe.html" class="sub-link"><i data-lucide="trending-up"></i> ROA &
+                                ROE</a></li>
+                        <li><a href="dashboards/nim.html" class="sub-link"><i data-lucide="percent"></i> Net Interest
+                                Margin</a></li>
+                        <li><a href="dashboards/cost-income.html" class="sub-link"><i data-lucide="calculator"></i>
+                                Cost-to-Income Ratio</a></li>
+                        <li><a href="dashboards/revenue.html" class="sub-link"><i data-lucide="bar-chart-3"></i> Revenue
+                                Analysis</a></li>
+                    </ul>
+                </li>
+
+                <!-- Operational Efficiency -->
+                <li class="nav-item">
+                    <a href="#" class="nav-link" @click.prevent="toggleMenu('operational')">
+                        <i data-lucide="gauge"></i>
+                        Operational Efficiency
+                        <i :data-lucide="expandedMenus.operational ? 'chevron-down' : 'chevron-right'" class="ml-auto"
+                            style="width: 16px; height: 16px;"></i>
+                    </a>
+                    <ul v-if="expandedMenus.operational" class="sub-menu">
+                        <li><a href="dashboards/transaction-processing.html" class="sub-link"><i data-lucide="zap"></i>
+                                Transaction Processing</a></li>
+                        <li><a href="dashboards/branch-performance.html" class="sub-link"><i
+                                    data-lucide="building-2"></i> Branch Performance</a>
+                        </li>
+                        <li><a href="dashboards/digital-usage.html" class="sub-link"><i data-lucide="smartphone"></i>
+                                Digital Channel Usage</a>
+                        </li>
+                        <li><a href="dashboards/employee-productivity.html" class="sub-link"><i
+                                    data-lucide="users-round"></i> Employee Productivity</a>
+                        </li>
+                    </ul>
+                </li>
+
+                <!-- Quality & Customer Experience -->
+                <li class="nav-item">
+                    <a href="#" class="nav-link" @click.prevent="toggleMenu('quality')">
+                        <i data-lucide="heart-handshake"></i>
+                        Quality & Experience
+                        <i :data-lucide="expandedMenus.quality ? 'chevron-down' : 'chevron-right'" class="ml-auto"
+                            style="width: 16px; height: 16px;"></i>
+                    </a>
+                    <ul v-if="expandedMenus.quality" class="sub-menu">
+                        <li><a href="dashboards/customer-satisfaction.html" class="sub-link"><i data-lucide="smile"></i>
+                                Customer Satisfaction</a></li>
+                        <li><a href="dashboards/nps.html" class="sub-link"><i data-lucide="award"></i> Net Promoter
+                                Score</a></li>
+                        <li><a href="dashboards/service-quality.html" class="sub-link"><i data-lucide="star"></i>
+                                Service Quality</a></li>
+                        <li><a href="dashboards/complaint-resolution.html" class="sub-link"><i
+                                    data-lucide="message-square"></i> Complaint
+                                Resolution</a>
+                        </li>
+                    </ul>
+                </li>
+
+                <!-- Risk Management -->
+                <li class="nav-item">
+                    <a href="#" class="nav-link" @click.prevent="toggleMenu('risk')">
+                        <i data-lucide="shield-alert"></i>
+                        Risk Management
+                        <i :data-lucide="expandedMenus.risk ? 'chevron-down' : 'chevron-right'" class="ml-auto"
+                            style="width: 16px; height: 16px;"></i>
+                    </a>
+                    <ul v-if="expandedMenus.risk" class="sub-menu">
+                        <li><a href="dashboards/credit-risk.html" class="sub-link"><i data-lucide="credit-card"></i>
+                                Credit Risk</a></li>
+                        <li><a href="dashboards/market-risk.html" class="sub-link"><i data-lucide="trending-down"></i>
+                                Market Risk</a></li>
+                        <li><a href="dashboards/operational-risk.html" class="sub-link"><i
+                                    data-lucide="alert-triangle"></i> Operational Risk</a>
+                        </li>
+                        <li><a href="dashboards/liquidity-risk.html" class="sub-link"><i data-lucide="droplet"></i>
+                                Liquidity Risk</a></li>
+                    </ul>
+                </li>
+
+                <!-- Compliance -->
+                <li class="nav-item">
+                    <a href="#" class="nav-link" @click.prevent="toggleMenu('compliance')">
+                        <i data-lucide="shield-check"></i>
+                        Compliance
+                        <i :data-lucide="expandedMenus.compliance ? 'chevron-down' : 'chevron-right'" class="ml-auto"
+                            style="width: 16px; height: 16px;"></i>
+                    </a>
+                    <ul v-if="expandedMenus.compliance" class="sub-menu">
+                        <li><a href="dashboards/boz-regulations.html" class="sub-link"><i data-lucide="landmark"></i>
+                                BoZ Regulations</a></li>
+                        <li><a href="dashboards/aml-cft.html" class="sub-link"><i data-lucide="shield-ban"></i>
+                                AML/CFT</a></li>
+                        <li><a href="dashboards/data-protection.html" class="sub-link"><i data-lucide="lock"></i> Data
+                                Protection</a></li>
+                        <li><a href="dashboards/audit-compliance.html" class="sub-link"><i
+                                    data-lucide="clipboard-check"></i> Audit Compliance</a>
+                        </li>
+                    </ul>
+                </li>
+
+                <li class="nav-divider"></li>
+
+                <!-- Data Entry -->
+                <li class="nav-item">
+                    <a href="#" class="nav-link" :class="{ 'active': currentView === 'capture' }"
+                        @click.prevent="setView('capture')">
+                        <i data-lucide="file-input"></i>
+                        Data Entry
+                    </a>
+                </li>
+
+                <!-- Reports -->
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i data-lucide="file-text"></i>
+                        Reports
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Header -->
+            <header class="top-header">
+                <div class="breadcrumbs">
+                    Main Menu / <strong>Dashboard</strong>
+                </div>
+                <div class="user-profile">
+                    <span style="font-size:0.875rem; font-weight:500;">Maimbolwa M.</span>
+                    <div class="user-avatar">MM</div>
+                </div>
+            </header>
+
+            <!-- Dashboard Content -->
+            <div class="dashboard-container" v-if="currentView === 'dashboard'">
+                <div class="flex items-end justify-between mb-8">
+                    <div>
+                        <h1 class="page-title">Executive Overview</h1>
+                        <p class="page-subtitle mb-0">Real-time Zambia operations intelligence and performance metrics.
+                        </p>
+                    </div>
+
+                    <!-- Global Filters -->
+                    <div class="flex items-center gap-3">
+                        <select v-model="filters.year" class="form-select">
+                            <option value="2024">FY 2024</option>
+                            <option value="2023">FY 2023</option>
+                            <option value="2022">FY 2022</option>
+                        </select>
+                        <select v-model="filters.period" class="form-select">
+                            <option value="All">Full Year</option>
+                            <option value="Q1">Q1 (Jan-Mar)</option>
+                            <option value="Q2">Q2 (Apr-Jun)</option>
+                            <option value="Q3">Q3 (Jul-Sep)</option>
+                            <option value="Q4">Q4 (Oct-Dec)</option>
+                        </select>
+                        <button class="btn-primary" @click="applyFilters">
+                            <i data-lucide="filter" width="16" class="mr-2"></i> Apply
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Loading State -->
+                <div v-if="loading" style="text-align:center; padding: 40px;">
+                    Loading Dashboard Data...
+                </div>
+
+                <div v-else>
+                    <!-- KPI Cards Row -->
+                    <div class="kpi-grid">
+                        <!-- ROA Card -->
+                        <div class="card" @click="openSheet('roa')" style="cursor: pointer;">
+                            <div class="card-header">
+                                <h3 class="card-title">Return on Assets</h3>
+                                <div class="icon-wrapper">
+                                    <i data-lucide="trending-up"></i>
+                                </div>
+                            </div>
+                            <div class="metric-value">{{ roaData[0].roa_percentage }}%</div>
+                            <div class="metric-change">
+                                <span class="change-up flex items-center">
+                                    <i data-lucide="arrow-up-right" style="width:14px;"></i> 4.5%
+                                </span>
+                                <span class="text-secondary ml-1">vs Q3 Target</span>
+                            </div>
+                            <div class="metric-footer">
+                                <span class="badge badge-primary">FY {{ filters.year }}</span>
+                                <span class="badge" v-if="filters.period !== 'All'">{{ filters.period }}</span>
+                                <span class="badge" v-else>Full Year</span>
+                                <span class="badge">ZMW {{ formatCompact(roaData[0].net_income) }} Net Income</span>
+                            </div>
+                        </div>
+
+                        <!-- NIM Card -->
+                        <div class="card" @click="openSheet('nim')" style="cursor: pointer;">
+                            <div class="card-header">
+                                <h3 class="card-title">Net Interest Margin</h3>
+                                <div class="icon-wrapper">
+                                    <i data-lucide="bar-chart-3"></i>
+                                </div>
+                            </div>
+                            <div class="metric-value">{{ dashboard.nim.value }}%</div>
+                            <div class="metric-change">
+                                <span :class="getTrendClass(dashboard.nim.trend)">
+                                    <i data-lucide="arrow-up-right" style="width:14px;"></i> {{ dashboard.nim.change }}%
+                                </span>
+                                <span class="text-secondary ml-1">{{ dashboard.nim.description }}</span>
+                            </div>
+                            <div class="metric-footer">
+                                <span class="badge badge-primary">FY {{ filters.year }}</span>
+                                <span class="badge ml-1" v-if="filters.period !== 'All'">{{ filters.period }}</span>
+                            </div>
+                        </div>
+
+                        <!-- Active Customers -->
+                        <div class="card" @click="openSheet('active_customers')" style="cursor: pointer;">
+                            <div class="card-header">
+                                <h3 class="card-title">Active Customers</h3>
+                                <div class="icon-wrapper">
+                                    <i data-lucide="users"></i>
+                                </div>
+                            </div>
+                            <div class="metric-value">{{ dashboard.active_customers.value }}</div>
+                            <div class="metric-change">
+                                <span :class="getTrendClass(dashboard.active_customers.trend)">
+                                    <i data-lucide="arrow-up-right" style="width:14px;"></i> {{
+                                    dashboard.active_customers.change }}
+                                </span>
+                                <span class="text-secondary ml-1">{{ dashboard.active_customers.description }}</span>
+                            </div>
+                            <div class="metric-footer">
+                                <span class="badge badge-primary">FY {{ filters.year }}</span>
+                                <span class="badge ml-1" v-if="filters.period !== 'All'">{{ filters.period }}</span>
+                            </div>
+                        </div>
+
+                        <!-- Compliance -->
+                        <div class="card" @click="openSheet('compliance_score')" style="cursor: pointer;">
+                            <div class="card-header">
+                                <h3 class="card-title">Compliance Score</h3>
+                                <div class="icon-wrapper">
+                                    <i data-lucide="shield-check"></i>
+                                </div>
+                            </div>
+                            <div class="metric-value">{{ dashboard.compliance_score.value }}/100</div>
+                            <div class="metric-change">
+                                <span :class="getTrendClass(dashboard.compliance_score.trend)">
+                                    <i data-lucide="arrow-up-right" style="width:14px;"></i> {{
+                                    dashboard.compliance_score.change }}
+                                </span>
+                                <span class="text-secondary ml-1">{{ dashboard.compliance_score.description }}</span>
+                            </div>
+                            <div class="metric-footer">
+                                <span class="badge badge-primary">FY {{ filters.year }}</span>
+                                <span class="badge ml-1" v-if="filters.period !== 'All'">{{ filters.period }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Section -->
+                    <div class="charts-grid">
+                        <div class="card chart-card" @click="openRevenueTrendAnalysis" style="cursor: pointer;">
+                            <div class="chart-header">
+                                <h3 class="chart-title">Revenue Trend (Monthly)</h3>
+                                <div style="font-size:0.875rem; color:var(--text-secondary); margin-top:4px;">
+                                    Total Revenue vs Targets
+                                </div>
+                            </div>
+                            <div id="revenueChart" @click.stop></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Data Capture Content -->
+            <div class="dashboard-container" v-if="currentView === 'capture'">
+                <div class="mb-8">
+                    <h1 class="page-title">Data Capture</h1>
+                    <p class="page-subtitle mb-0">Manual entry for monthly performance indicators across Zambia
+                        operations.
+                    </p>
+                </div>
+
+                <!-- Tabs -->
+                <div class="tabs-list mb-6">
+                    <div class="tab-trigger" :class="{ 'active': activeTab === 'financials' }"
+                        @click="activeTab = 'financials'">Financial Metrics</div>
+                    <div class="tab-trigger" :class="{ 'active': activeTab === 'customers' }"
+                        @click="activeTab = 'customers'">Customer Metrics</div>
+                    <div class="tab-trigger" :class="{ 'active': activeTab === 'compliance' }"
+                        @click="activeTab = 'compliance'">Compliance & Risk</div>
+                </div>
+
+                <!-- Financials Tab -->
+                <div v-if="activeTab === 'financials'" class="card p-6 animate-fade-in">
+                    <div class="mb-6 pb-4 border-b border-gray-100">
+                        <h3 class="text-lg font-bold">Core Financials</h3>
+                        <p class="text-secondary text-sm">Enter profit and loss summary for the current reporting month.
+                        </p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+                        <div class="form-group">
+                            <label class="form-label">Net Income (ZMW)</label>
+                            <input type="number" class="form-input" placeholder="0.00">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Total Assets (ZMW)</label>
+                            <input type="number" class="form-input" placeholder="0.00">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Interest Income (ZMW)</label>
+                            <input type="number" class="form-input" placeholder="0.00">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Interest Expense (ZMW)</label>
+                            <input type="number" class="form-input" placeholder="0.00">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Operating Expense (ZMW)</label>
+                            <input type="number" class="form-input" placeholder="0.00">
+                        </div>
+                    </div>
+                    <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
+                        <button class="btn-outline">
+                            <i data-lucide="refresh-ccw" width="16" class="mr-2"></i> Reset
+                        </button>
+                        <button class="btn-primary" @click="applyFilters">
+                            <i data-lucide="save" width="16" class="mr-2"></i> Save Financials
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Customers Tab -->
+                <div v-if="activeTab === 'customers'" class="card p-6 animate-fade-in">
+                    <div class="mb-6 pb-4 border-b border-gray-100">
+                        <h3 class="text-lg font-bold">Customer Segment Performance</h3>
+                        <p class="text-secondary text-sm">Updates for customer numbers across various banking tiers.</p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div class="form-group">
+                            <label class="form-label">Retail Customers</label>
+                            <input type="number" class="form-input" placeholder="Number of accounts">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Corporate Customers</label>
+                            <input type="number" class="form-input" placeholder="Number of entities">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">SME Customers</label>
+                            <input type="number" class="form-input" placeholder="Number of businesses">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Churn (Monthly)</label>
+                            <input type="number" class="form-input" placeholder="0">
+                        </div>
+                    </div>
+                    <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
+                        <button class="btn-outline">
+                            <i data-lucide="refresh-ccw" width="16" class="mr-2"></i> Reset
+                        </button>
+                        <button class="btn-primary" @click="applyFilters">
+                            <i data-lucide="save" width="16" class="mr-2"></i> Save Customer Metrics
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Compliance Tab -->
+                <div v-if="activeTab === 'compliance'" class="card p-6 animate-fade-in">
+                    <div class="mb-6 pb-4 border-b border-gray-100">
+                        <h3 class="text-lg font-bold">Regulatory & Compliance</h3>
+                        <p class="text-secondary text-sm">Report current ratios and status of outstanding regulatory
+                            items.</p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div class="form-group">
+                            <label class="form-label">Liquidity Coverage Ratio (%)</label>
+                            <input type="number" class="form-input" placeholder="100.0">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Capital Adequacy Ratio (%)</label>
+                            <input type="number" class="form-input" placeholder="10.0">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Pending Audit Issues</label>
+                            <input type="number" class="form-input" placeholder="0">
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3 p-4 bg-yellow-50 border border-yellow-100 rounded-xl mb-6">
+                        <i data-lucide="alert-circle" class="text-yellow-600 mt-1"></i>
+                        <div>
+                            <p class="text-sm font-bold text-yellow-700">Notice</p>
+                            <p class="text-xs text-yellow-600">Regulatory reports must be captured by the 5th of every
+                                month.</p>
+                        </div>
+                    </div>
+                    <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
+                        <button class="btn-outline">
+                            <i data-lucide="refresh-ccw" width="16" class="mr-2"></i> Reset
+                        </button>
+                        <button class="btn-primary" @click="applyFilters">
+                            <i data-lucide="save" width="16" class="mr-2"></i> Save Compliance Data
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Drill-down Modal (Sheet) -->
+        <div class="sheet-overlay" :class="{ 'visible': activeSheet }" @click="closeSheet">
+            <div v-if="activeSheet" class="sheet-content" @click.stop :class="{ 'maximized': isMaximized }">
+                <div class="sheet-header">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2 bg-emerald-50 rounded-lg text-primary">
+                            <i :data-lucide="activeSheet.icon"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-bold">{{ activeSheet.title }}</h2>
+                            <p class="text-sm text-secondary">{{ activeSheet.description }}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button class="btn-icon" @click="toggleMaximize">
+                            <i :data-lucide="isMaximized ? 'minimize-2' : 'maximize-2'"></i>
+                        </button>
+                        <button class="btn-icon" @click="closeSheet">
+                            <i data-lucide="x"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Sheet Body (Split Pane) -->
+                <div class="sheet-body flex flex-1 overflow-hidden">
+                    <!-- Level 2: Sections List -->
+                    <div class="level-2-pane" :class="isMaximized ? 'w-30' : 'w-full'">
+                        <!-- Highlight Card -->
+                        <div class="highlight-card mb-6">
+                            <div class="text-xs font-bold text-secondary uppercase tracking-widest mb-1">Current
+                                Aggregate
+                            </div>
+                            <div class="flex items-baseline gap-2">
+                                <span class="text-3xl font-bold text-primary">{{ activeSheet.value }}</span>
+                                <span class="text-sm font-semibold flex items-center"
+                                    :class="getTrendClass(activeSheet.trend)">
+                                    <i data-lucide="arrow-up-right" width="16"></i> {{ activeSheet.change }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Drill Down Sections -->
+                        <div v-if="activeSheet.drill_down">
+                            <div v-for="(section, sIdx) in activeSheet.drill_down.sections" :key="sIdx" class="mb-6">
+                                <h4 class="section-title">{{ section.title }}</h4>
+                                <div class="flex flex-col gap-3">
+                                    <div v-for="(item, iIdx) in section.items" :key="iIdx" class="drill-item"
+                                        :class="{ 'active': selectedItem === item }" @click="selectItem(item)">
+                                        <span class="text-sm font-medium">{{ item.label }}</span>
+                                        <span class="font-bold">{{ item.value }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Level 3: Detailed Breakdown (Only in Maximized) -->
+                    <div v-if="isMaximized" class="level-3-pane w-70">
+                        <div v-if="selectedItem" class="animate-fade-in">
+                            <div class="flex items-center justify-between pb-6 border-b border-gray-100 mb-6">
+                                <div>
+                                    <h3 class="text-2xl font-bold text-gray-900">{{ selectedItem.label }}</h3>
+                                    <p class="text-secondary text-sm">Detailed Breakdown</p>
+                                </div>
+                                <div class="text-2xl font-bold text-primary">{{ selectedItem.value }}</div>
+                            </div>
+
+                            <div v-if="selectedItem.sub_items" class="grid grid-cols-2 gap-4">
+                                <div v-for="(sub, idx) in selectedItem.sub_items" :key="idx" class="stat-card">
+                                    <div class="text-sm text-secondary mb-1">{{ sub.label }}</div>
+                                    <div class="text-lg font-bold text-gray-900">{{ sub.value }}</div>
+                                </div>
+                            </div>
+                            <div v-else class="empty-state">
+                                No granular details available.
+                            </div>
+                        </div>
+                        <div v-else class="flex flex-col items-center justify-center h-full text-secondary">
+                            <i data-lucide="bar-chart-2" width="48" height="48" class="opacity-20 mb-4"></i>
+                            <p>Select a metric from the left to view details</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sheet-footer">
+                    <span class="badge badge-primary">FY 2024</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data & App Scripts -->
+        <script src="js/data.js"></script>
+        <script src="js/app.js"></script>
+</body>
+
+</html>

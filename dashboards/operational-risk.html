@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="page-title">Operational Risk - NatSave Bank KPIs</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- External Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+
+<body>
+    <div id="app" v-cloak>
+        <div class="app-container">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <div class="sidebar-header">
+                    <span class="brand-accent">NAT</span>SAVE <span
+                        style="font-weight:300; margin-left:8px; font-size:0.8em; opacity:0.8;">KPIs</span>
+                </div>
+                <ul class="nav-menu">
+                    <!-- Section: Overview -->
+                    <li class="nav-section-header">OVERVIEW</li>
+
+                    <!-- Dashboard -->
+                    <li class="nav-item">
+                        <a href="../index.html" class="nav-link">
+                            <i data-lucide="layout-dashboard"></i>
+                            Dashboard
+                        </a>
+                    </li>
+
+                    <!-- Section: KPI Categories -->
+                    <li class="nav-section-header">KPI CATEGORIES</li>
+
+                    <!-- Financial Performance -->
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" @click.prevent="toggleMenu('financial')">
+                            <i data-lucide="dollar-sign"></i>
+                            Financial Performance
+                            <i :data-lucide="expandedMenus.financial ? 'chevron-down' : 'chevron-right'" class="ml-auto"
+                                style="width: 16px; height: 16px;"></i>
+                        </a>
+                        <ul v-if="expandedMenus.financial" class="sub-menu">
+                            <li><a href="roa-roe.html" class="sub-link"
+                                    :class="{ 'active': currentPage === 'roa_roe' }"><i data-lucide="trending-up"></i>
+                                    ROA & ROE</a></li>
+                            <li><a href="nim.html" class="sub-link" :class="{ 'active': currentPage === 'nim' }"><i
+                                        data-lucide="percent"></i> Net Interest Margin</a></li>
+                            <li><a href="cost-income.html" class="sub-link"
+                                    :class="{ 'active': currentPage === 'cost_income' }"><i
+                                        data-lucide="calculator"></i> Cost-to-Income Ratio</a></li>
+                            <li><a href="revenue.html" class="sub-link"
+                                    :class="{ 'active': currentPage === 'revenue' }"><i data-lucide="bar-chart-3"></i>
+                                    Revenue Analysis</a></li>
+                        </ul>
+                    </li>
+
+                    <!-- Operational Efficiency -->
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" @click.prevent="toggleMenu('operational')">
+                            <i data-lucide="gauge"></i>
+                            Operational Efficiency
+                            <i :data-lucide="expandedMenus.operational ? 'chevron-down' : 'chevron-right'"
+                                class="ml-auto" style="width: 16px; height: 16px;"></i>
+                        </a>
+                        <ul v-if="expandedMenus.operational" class="sub-menu">
+                            <li><a href="transaction-processing.html" class="sub-link"
+                                    :class="{ 'active': currentPage === 'transaction_processing' }"><i
+                                        data-lucide="zap"></i> Transaction Processing</a></li>
+                            <li><a href="branch-performance.html" class="sub-link"
+                                    :class="{ 'active': currentPage === 'branch_performance' }"><i
+                                        data-lucide="building-2"></i> Branch Performance</a></li>
+                            <li><a href="digital-usage.html" class="sub-link"
+                                    :class="{ 'active': currentPage === 'digital_usage' }"><i
+                                        data-lucide="smartphone"></i> Digital Channel Usage</a></li>
+                            <li><a href="employee-productivity.html" class="sub-link"
+                                    :class="{ 'active': currentPage === 'employee_productivity' }"><i
+                                        data-lucide="users-round"></i> Employee Productivity</a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <!-- Quality & Customer Experience -->
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" @click.prevent="toggleMenu('quality')">
+                            <i data-lucide="heart-handshake"></i>
+                            Quality & Experience
+                            <i :data-lucide="expandedMenus.quality ? 'chevron-down' : 'chevron-right'" class="ml-auto"
+                                style="width: 16px; height: 16px;"></i>
+                        </a>
+                        <ul v-if="expandedMenus.quality" class="sub-menu">
+                            <li><a href="customer-satisfaction.html" class="sub-link"
+                                    :class="{ 'active': currentPage === 'customer_satisfaction' }"><i
+                                        data-lucide="smile"></i> Customer Satisfaction</a></li>
+                            <li><a href="nps.html" class="sub-link" :class="{ 'active': currentPage === 'nps' }"><i
+                                        data-lucide="award"></i> Net Promoter Score</a></li>
+                            <li><a href="service-quality.html" class="sub-link"
+                                    :class="{ 'active': currentPage === 'service_quality' }"><i data-lucide="star"></i>
+                                    Service Quality</a></li>
+                            <li><a href="complaint-resolution.html" class="sub-link"
+                                    :class="{ 'active': currentPage === 'complaint_resolution' }"><i
+                                        data-lucide="message-square"></i> Complaint Resolution</a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <!-- Risk Management -->
+                    <li class="nav-item">
+                        <a href="#" class="nav-link active" @click.prevent="toggleMenu('risk')">
+                            <i data-lucide="shield-alert"></i>
+                            Risk Management
+                            <i :data-lucide="expandedMenus.risk ? 'chevron-down' : 'chevron-right'" class="ml-auto"
+                                style="width: 16px; height: 16px;"></i>
+                        </a>
+                        <ul v-if="expandedMenus.risk" class="sub-menu">
+                            <li><a href="credit-risk.html" class="sub-link"
+                                    :class="{ 'active': currentPage === 'credit_risk' }"><i
+                                        data-lucide="credit-card"></i> Credit Risk</a></li>
+                            <li><a href="market-risk.html" class="sub-link"
+                                    :class="{ 'active': currentPage === 'market_risk' }"><i
+                                        data-lucide="trending-down"></i> Market Risk</a></li>
+                            <li><a href="operational-risk.html" class="sub-link"
+                                    :class="{ 'active': currentPage === 'operational_risk' }"><i
+                                        data-lucide="alert-triangle"></i> Operational Risk</a></li>
+                            <li><a href="liquidity-risk.html" class="sub-link"
+                                    :class="{ 'active': currentPage === 'liquidity_risk' }"><i
+                                        data-lucide="droplet"></i> Liquidity Risk</a></li>
+                        </ul>
+                    </li>
+
+                    <!-- Compliance -->
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" @click.prevent="toggleMenu('compliance')">
+                            <i data-lucide="shield-check"></i>
+                            Compliance
+                            <i :data-lucide="expandedMenus.compliance ? 'chevron-down' : 'chevron-right'"
+                                class="ml-auto" style="width: 16px; height: 16px;"></i>
+                        </a>
+                        <ul v-if="expandedMenus.compliance" class="sub-menu">
+                            <li><a href="boz-regulations.html" class="sub-link"
+                                    :class="{ 'active': currentPage === 'boz_regulations' }"><i
+                                        data-lucide="landmark"></i> BoZ Regulations</a></li>
+                            <li><a href="aml-cft.html" class="sub-link"
+                                    :class="{ 'active': currentPage === 'aml_cft' }"><i data-lucide="shield-ban"></i>
+                                    AML/CFT</a></li>
+                            <li><a href="data-protection.html" class="sub-link"
+                                    :class="{ 'active': currentPage === 'data_protection' }"><i data-lucide="lock"></i>
+                                    Data Protection</a></li>
+                            <li><a href="audit-compliance.html" class="sub-link"
+                                    :class="{ 'active': currentPage === 'audit_compliance' }"><i
+                                        data-lucide="clipboard-check"></i> Audit Compliance</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="nav-divider"></li>
+
+                    <!-- Data Entry -->
+                    <li class="nav-item">
+                        <a href="../index.html?view=capture" class="nav-link">
+                            <i data-lucide="file-input"></i>
+                            Data Entry
+                        </a>
+                    </li>
+
+                    <!-- Reports -->
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            <i data-lucide="file-text"></i>
+                            Reports
+                        </a>
+                    </li>
+                </ul>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="main-content">
+                <!-- Breadcrumb Bar -->
+                <div class="breadcrumb-bar"
+                    style="border-bottom: 1px solid #e2e8f0; padding: 16px 24px; position: sticky; top: 0; background: white; z-index: 10;">
+                    <div class="breadcrumb-container" style="padding: 0;">
+                        <div class="breadcrumb-path">
+                            <a href="../index.html" class="breadcrumb-link"
+                                style="color: var(--text-secondary); text-decoration: none; display: flex; align-items: center; gap: 4px;">
+                                <i data-lucide="layout-dashboard" style="width: 14px; height: 14px;"></i>
+                                Dashboard
+                            </a>
+                            <i data-lucide="chevron-right" class="breadcrumb-separator"></i>
+                            <span class="breadcrumb-category">{{ dashboard.category }}</span>
+                            <i data-lucide="chevron-right" class="breadcrumb-separator"></i>
+                            <span class="breadcrumb-current">{{ dashboard.title }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sub-dashboard-container" style="padding: 24px;">
+                    <!-- Header -->
+                    <div class="sub-dashboard-header">
+                        <div>
+                            <h1 class="page-title">{{ dashboard.title }}</h1>
+                            <p class="page-subtitle mb-0">{{dashboard.description}} - {{ dashboard.period }}</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <select class="form-select">
+                                <option>FY 2024</option>
+                                <option>FY 2023</option>
+                                <option>FY 2022</option>
+                            </select>
+                            <button class="btn-primary">
+                                <i data-lucide="download" width="16" class="mr-2"></i> Export
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- KPI Cards -->
+                    <div class="kpi-grid">
+                        <div v-for="(kpi, index) in dashboard.kpis" :key="index" class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">{{ kpi.label }}</h3>
+                                <div class="icon-wrapper" :class="getStatusClass(kpi.status)">
+                                    <i :data-lucide="getStatusIcon(kpi.status)"></i>
+                                </div>
+                            </div>
+                            <div class="metric-value">{{ kpi.value }}</div>
+                            <div class="metric-change">
+                                <span :class="getTrendClass(kpi.trend)">
+                                    <i :data-lucide="getTrendIcon(kpi.trend)" style="width:14px;"></i>
+                                    {{ kpi.change }}
+                                </span>
+                                <span class="text-secondary ml-1">vs target</span>
+                            </div>
+                            <div class="metric-footer">
+                                <span class="text-secondary">Target: {{ kpi.target }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Row -->
+                    <div class="charts-row">
+                        <div class="card chart-card chart-large">
+                            <div class="chart-header">
+                                <h3 class="chart-title">Quarterly Trend Analysis</h3>
+                                <p class="text-secondary text-sm">Performance trends over time</p>
+                            </div>
+                            <div id="trendChart"></div>
+                        </div>
+
+                        <div class="card chart-card chart-medium">
+                            <div class="chart-header">
+                                <h3 class="chart-title">Component Breakdown</h3>
+                                <p class="text-secondary text-sm">Key components</p>
+                            </div>
+                            <div id="breakdownChart"></div>
+                        </div>
+                    </div>
+
+                    <!-- Data Table -->
+                    <div v-if="dashboard.breakdown" class="data-table-container">
+                        <div class="card" style="border:none; box-shadow:none;">
+                            <div class="chart-header mb-6">
+                                <h3 class="chart-title">Detailed Breakdown</h3>
+                                <p class="text-secondary text-sm">Component analysis</p>
+                            </div>
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Component</th>
+                                        <th class="text-right">Value</th>
+                                        <th class="text-right">Change (YoY)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="(item, index) in dashboard.breakdown" :key="index">
+                                        <td class="font-medium">{{ item.label }}</td>
+                                        <td class="text-right font-bold">{{ item.value }}</td>
+                                        <td class="text-right">
+                                            <span :class="item.change.startsWith('+') ? 'change-up' : 'change-down'">
+                                                {{ item.change }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../js/dashboard-data.js"></script>
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    currentPage: '',
+                    expandedMenus: {
+                        financial: true, // Auto-expand for this section
+                        operational: false,
+                        quality: false,
+                        risk: false,
+                        compliance: false
+                    },
+                    dashboard: {},
+                    charts: {
+                        trend: null,
+                        breakdown: null
+                    }
+                }
+            },
+            mounted() {
+                // Get dashboard key from URL or default
+                const dashboardKey = this.getDashboardKey();
+                // Set current page for active link styling
+                this.currentPage = dashboardKey;
+                this.dashboard = DASHBOARD_DATA[dashboardKey] || {};
+
+                // Auto-expand correct menu
+                const category = this.dashboard.category;
+                if (category === 'Financial Performance') this.expandedMenus.financial = true;
+                if (category === 'Operational Efficiency') this.expandedMenus.operational = true;
+                if (category === 'Quality & Experience') this.expandedMenus.quality = true;
+                if (category === 'Risk Management') this.expandedMenus.risk = true;
+                if (category === 'Compliance') this.expandedMenus.compliance = true;
+
+                this.$nextTick(() => {
+                    this.initCharts();
+                    if (window.lucide) lucide.createIcons();
+                });
+            },
+            methods: {
+                toggleMenu(menuKey) {
+                    this.expandedMenus[menuKey] = !this.expandedMenus[menuKey];
+                    // Only reinitialize icons in next tick
+                    this.$nextTick(() => {
+                        if (window.lucide) {
+                            lucide.createIcons();
+                        }
+                    });
+                },
+                getDashboardKey() {
+                    const path = window.location.pathname;
+
+                    // Operational
+                    if (path.includes('transaction-processing')) return 'transaction_processing';
+                    if (path.includes('branch-performance')) return 'branch_performance';
+                    if (path.includes('digital-usage')) return 'digital_usage';
+                    if (path.includes('employee-productivity')) return 'employee_productivity';
+
+                    // Quality
+                    if (path.includes('customer-satisfaction')) return 'customer_satisfaction';
+                    if (path.includes('nps')) return 'nps';
+                    if (path.includes('service-quality')) return 'service_quality';
+                    if (path.includes('complaint-resolution')) return 'complaint_resolution';
+
+                    // Risk
+                    if (path.includes('credit-risk')) return 'credit_risk';
+                    if (path.includes('market-risk')) return 'market_risk';
+                    if (path.includes('operational-risk')) return 'operational_risk';
+                    if (path.includes('liquidity-risk')) return 'liquidity_risk';
+
+                    // Compliance
+                    if (path.includes('boz-regulations')) return 'boz_regulations';
+                    if (path.includes('aml-cft')) return 'aml_cft';
+                    if (path.includes('data-protection')) return 'data_protection';
+                    if (path.includes('audit-compliance')) return 'audit_compliance';
+
+                    // Financial
+                    if (path.includes('roa-roe')) return 'roa_roe';
+                    if (path.includes('nim')) return 'nim';
+                    if (path.includes('cost-income')) return 'cost_income';
+                    if (path.includes('revenue')) return 'revenue';
+
+                    return 'roa_roe'; // default
+                },
+                getStatusClass(status) {
+                    if (status === 'above' || status === 'on_target') return 'status-good';
+                    if (status === 'below') return 'status-warning';
+                    return '';
+                },
+                getStatusIcon(status) {
+                    if (status === 'above' || status === 'on_target') return 'check-circle';
+                    if (status === 'below') return 'alert-circle';
+                    return 'info';
+                },
+                getTrendClass(trend) {
+                    if (trend === 'up') return 'change-up flex items-center';
+                    if (trend === 'down') return 'change-down flex items-center';
+                    return 'change-neutral flex items-center';
+                },
+                getTrendIcon(trend) {
+                    if (trend === 'up') return 'arrow-up-right';
+                    if (trend === 'down') return 'arrow-down-right';
+                    return 'minus';
+                },
+                initCharts() {
+                    if (!this.dashboard.trendData) return;
+
+                    // Determine if we should show percentage
+                    const isPercent = this.dashboard.kpis && this.dashboard.kpis.some(k => k.value.includes('%'));
+
+                    // Trend Chart
+                    const trendOptions = {
+                        series: this.getTrendSeries(),
+                        chart: {
+                            type: 'area',
+                            height: 350,
+                            fontFamily: 'Inter, sans-serif',
+                            toolbar: { show: false }
+                        },
+                        colors: ['#00AE57', '#007bff', '#6f42c1', '#fd7e14'],
+                        fill: {
+                            type: 'gradient',
+                            gradient: {
+                                shadeIntensity: 1,
+                                opacityFrom: 0.4,
+                                opacityTo: 0.05,
+                                stops: [0, 100]
+                            }
+                        },
+                        dataLabels: { enabled: false },
+                        stroke: {
+                            width: 2,
+                            curve: 'smooth'
+                        },
+                        xaxis: {
+                            categories: this.dashboard.trendData.labels
+                        },
+                        yaxis: {
+                            labels: {
+                                formatter: (val) => val.toFixed(1) + (isPercent ? '%' : '')
+                            }
+                        },
+                        legend: { position: 'top' },
+                        tooltip: { theme: 'light' }
+                    };
+
+                    if (this.charts.trend) {
+                        this.charts.trend.destroy();
+                    }
+                    this.charts.trend = new ApexCharts(document.querySelector("#trendChart"), trendOptions);
+                    this.charts.trend.render();
+
+                    // Breakdown Chart (if available)
+                    if (this.dashboard.breakdown) {
+                        const breakdownOptions = {
+                            series: this.dashboard.breakdown.map(item => {
+                                const val = parseFloat(item.value.replace(/[^\d.-]/g, ''));
+                                return isNaN(val) ? 0 : val;
+                            }),
+                            chart: {
+                                type: 'donut',
+                                height: 350,
+                                fontFamily: 'Inter, sans-serif'
+                            },
+                            labels: this.dashboard.breakdown.map(item => item.label),
+                            colors: ['#00AE57', '#0F5132', '#FFD700', '#94A3B8'],
+                            legend: { position: 'bottom' },
+                            dataLabels: { enabled: false }
+                        };
+
+                        if (this.charts.breakdown) {
+                            this.charts.breakdown.destroy();
+                        }
+                        this.charts.breakdown = new ApexCharts(document.querySelector("#breakdownChart"), breakdownOptions);
+                        this.charts.breakdown.render();
+                    }
+                },
+                getTrendSeries() {
+                    const data = this.dashboard.trendData;
+                    if (!data) return [];
+
+                    const series = [];
+                    for (const key in data) {
+                        if (key !== 'labels' && key !== 'labelsFull' && key !== 'targets' && Array.isArray(data[key])) {
+                            // Basic formatting: camelCase to Title Case
+                            const name = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+                            series.push({ name: name, data: data[key] });
+                        }
+                    }
+                    return series;
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+
+</html>
