@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports - NatSave Bank KPIs</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/styles.css">
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script>
+</head>
+
+<body>
+    <div id="app" v-cloak>
+        <div class="app-container" style="display:flex; min-height: 100vh;">
+            <!-- Sidebar (Reused) -->
+            <aside class="sidebar">
+                <div class="sidebar-header">
+                    <span class="brand-accent">NAT</span>SAVE <span
+                        style="font-weight:300; margin-left:8px; font-size:0.8em; opacity:0.8;">KPIs</span>
+                </div>
+                <ul class="nav-menu">
+                    <li class="nav-section-header">OVERVIEW</li>
+                    <li class="nav-item">
+                        <a href="index.html" class="nav-link">
+                            <i data-lucide="layout-dashboard"></i>
+                            Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-section-header">KPI CATEGORIES</li>
+                    <!-- Financial -->
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" @click.prevent>
+                            <i data-lucide="dollar-sign"></i>
+                            Financial Performance
+                        </a>
+                    </li>
+                    <!-- Operational -->
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" @click.prevent>
+                            <i data-lucide="gauge"></i>
+                            Operational Efficiency
+                        </a>
+                    </li>
+                    <li class="nav-divider"></li>
+                    <li class="nav-item">
+                        <a href="index.html?view=capture" class="nav-link">
+                            <i data-lucide="file-input"></i>
+                            Data Entry
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="reports.html" class="nav-link active">
+                            <i data-lucide="file-text"></i>
+                            Reports
+                        </a>
+                    </li>
+                </ul>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="main-content" style="flex:1; display:flex; flex-direction:column;">
+                <header class="top-header">
+                    <div class="breadcrumbs">
+                        Main Menu / <strong>Reports</strong>
+                    </div>
+                    <div class="user-profile">
+                        <span style="font-size:0.875rem; font-weight:500;">Maimbolwa M.</span>
+                        <div class="user-avatar">MM</div>
+                    </div>
+                </header>
+
+                <div class="dashboard-container"
+                    style="flex:1; display:flex; align-items:center; justify-content:center; flex-direction:column; text-align:center;">
+                    <div
+                        style="background:var(--card-bg); padding:64px; border-radius:24px; border:1px solid var(--border); max-width:600px;">
+                        <div
+                            style="background:rgba(0,174,87,0.1); width:80px; height:80px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 24px auto;">
+                            <i data-lucide="file-text" style="width:40px; height:40px; color:var(--primary);"></i>
+                        </div>
+                        <h1 class="page-title" style="margin-bottom:16px;">Reports Module</h1>
+                        <p class="page-subtitle">
+                            The advanced reporting engine is currently under development. <br>
+                            Please check back later for automated PDF generation and scheduled formatting.
+                        </p>
+                        <a href="index.html" class="btn-primary" style="display:inline-flex; text-decoration:none;">
+                            Return to Dashboard
+                        </a>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+        createApp({
+            mounted() {
+                if (window.lucide) lucide.createIcons();
+            }
+        }).mount('#app');
+    </script>
+</body>
+
+</html>

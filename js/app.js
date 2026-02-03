@@ -27,7 +27,40 @@ const app = createApp({
             // Modal State
             activeSheet: null,
             isMaximized: false,
-            selectedItem: null
+            selectedItem: null,
+            // Data Entry State
+            formData: {
+                financial: {
+                    netIncome: null, totalAssets: null, totalLiabilities: null, shEquity: null,
+                    interestIncome: null, interestExpense: null, earningAssets: null,
+                    operatingIncome: null, operatingExpenses: null,
+                    feeCommission: null, otherIncome: null
+                },
+                operational: {
+                    totalTransactions: null, successRate: null, avgProcessingTime: null,
+                    monthlyFootfall: null, avgWaitTime: null, serviceTime: null,
+                    activeMobileUsers: null, internetBankingUsers: null, appDownloads: null,
+                    revenuePerEmp: null, accountsPerRM: null, trainingHours: null
+                },
+                quality: {
+                    overallCSAT: null, branchCSAT: null, digitalCSAT: null,
+                    npsScore: null, retailNPS: null, corporateNPS: null,
+                    slaAdherence: null, firstContactRes: null, errorRate: null,
+                    avgResolutionTime: null, openTickets: null, escalationRate: null
+                },
+                risk: {
+                    nplRatio: null, par30: null, costOfRisk: null,
+                    var: null, fxExposure: null, earningsAtRisk: null,
+                    lossEvents: null, totalFinLoss: null, nearMisses: null,
+                    lcr: null, nsfr: null, ldr: null
+                },
+                compliance: {
+                    capitalAdequacy: null, regBreaches: null, reportingAccuracy: null,
+                    kycCompliance: null, strsFiled: null, txnMonitoring: null,
+                    dataBreaches: null, subjectRequests: null, policyAcceptance: null,
+                    openFindings: null, highRiskOpen: null, closureRate: null
+                }
+            }
         }
     },
     mounted() {
@@ -35,6 +68,17 @@ const app = createApp({
         this.$nextTick(() => {
             if (window.lucide) lucide.createIcons();
         });
+
+        // Load saved data from localStorage
+        if (window.StorageManager) {
+            const savedData = window.StorageManager.getAllKPIData();
+            // Merge saved data into formData, preserving structure
+            if (savedData.financial) Object.assign(this.formData.financial, savedData.financial);
+            if (savedData.operational) Object.assign(this.formData.operational, savedData.operational);
+            if (savedData.quality) Object.assign(this.formData.quality, savedData.quality);
+            if (savedData.risk) Object.assign(this.formData.risk, savedData.risk);
+            if (savedData.compliance) Object.assign(this.formData.compliance, savedData.compliance);
+        }
 
         // Simulate fetching data
         this.fetchData();
@@ -405,6 +449,31 @@ const app = createApp({
 
             this.revenueChart = new ApexCharts(document.querySelector("#revenueChart"), options);
             this.revenueChart.render();
+        },
+        async saveData(category) {
+            this.loading = true;
+
+            // Simulate API delay
+            await new Promise(resolve => setTimeout(resolve, 600));
+
+            if (window.StorageManager) {
+                const success = window.StorageManager.saveKPIData(category, this.formData[category]);
+                if (success) {
+                    alert(`${category.charAt(0).toUpperCase() + category.slice(1)} data saved successfully!`);
+                } else {
+                    alert('Error saving data. Please try again.');
+                }
+            }
+
+            this.loading = false;
+        },
+        resetForm(category) {
+            if (confirm('Are you sure you want to clear this form? Unsaved changes will be lost.')) {
+                // Reset specific category fields to null
+                Object.keys(this.formData[category]).forEach(key => {
+                    this.formData[category][key] = null;
+                });
+            }
         }
     }
 });

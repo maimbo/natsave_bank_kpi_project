@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -48,13 +48,12 @@
 
                 <!-- Financial Performance -->
                 <li class="nav-item">
-                    <a href="#" class="nav-link" @click.prevent="toggleMenu('financial')">
+                    <a href="#" class="nav-link" data-menu="financial">
                         <i data-lucide="dollar-sign"></i>
-                        Financial Performance
-                        <i :data-lucide="expandedMenus.financial ? 'chevron-down' : 'chevron-right'" class="ml-auto"
+                        Financial Performance <i data-lucide="chevron-right" class="ml-auto menu-chevron"
                             style="width: 16px; height: 16px;"></i>
                     </a>
-                    <ul v-if="expandedMenus.financial" class="sub-menu">
+                    <ul style="display:none;" class="sub-menu">
                         <li><a href="dashboards/roa-roe.html" class="sub-link"><i data-lucide="trending-up"></i> ROA &
                                 ROE</a></li>
                         <li><a href="dashboards/nim.html" class="sub-link"><i data-lucide="percent"></i> Net Interest
@@ -68,13 +67,12 @@
 
                 <!-- Operational Efficiency -->
                 <li class="nav-item">
-                    <a href="#" class="nav-link" @click.prevent="toggleMenu('operational')">
+                    <a href="#" class="nav-link" data-menu="operational">
                         <i data-lucide="gauge"></i>
-                        Operational Efficiency
-                        <i :data-lucide="expandedMenus.operational ? 'chevron-down' : 'chevron-right'" class="ml-auto"
+                        Operational Efficiency <i data-lucide="chevron-right" class="ml-auto menu-chevron"
                             style="width: 16px; height: 16px;"></i>
                     </a>
-                    <ul v-if="expandedMenus.operational" class="sub-menu">
+                    <ul style="display:none;" class="sub-menu">
                         <li><a href="dashboards/transaction-processing.html" class="sub-link"><i data-lucide="zap"></i>
                                 Transaction Processing</a></li>
                         <li><a href="dashboards/branch-performance.html" class="sub-link"><i
@@ -91,13 +89,12 @@
 
                 <!-- Quality & Customer Experience -->
                 <li class="nav-item">
-                    <a href="#" class="nav-link" @click.prevent="toggleMenu('quality')">
+                    <a href="#" class="nav-link" data-menu="quality">
                         <i data-lucide="heart-handshake"></i>
-                        Quality & Experience
-                        <i :data-lucide="expandedMenus.quality ? 'chevron-down' : 'chevron-right'" class="ml-auto"
+                        Quality & Experience <i data-lucide="chevron-right" class="ml-auto menu-chevron"
                             style="width: 16px; height: 16px;"></i>
                     </a>
-                    <ul v-if="expandedMenus.quality" class="sub-menu">
+                    <ul style="display:none;" class="sub-menu">
                         <li><a href="dashboards/customer-satisfaction.html" class="sub-link"><i data-lucide="smile"></i>
                                 Customer Satisfaction</a></li>
                         <li><a href="dashboards/nps.html" class="sub-link"><i data-lucide="award"></i> Net Promoter
@@ -113,13 +110,12 @@
 
                 <!-- Risk Management -->
                 <li class="nav-item">
-                    <a href="#" class="nav-link" @click.prevent="toggleMenu('risk')">
+                    <a href="#" class="nav-link" data-menu="risk">
                         <i data-lucide="shield-alert"></i>
-                        Risk Management
-                        <i :data-lucide="expandedMenus.risk ? 'chevron-down' : 'chevron-right'" class="ml-auto"
+                        Risk Management <i data-lucide="chevron-right" class="ml-auto menu-chevron"
                             style="width: 16px; height: 16px;"></i>
                     </a>
-                    <ul v-if="expandedMenus.risk" class="sub-menu">
+                    <ul style="display:none;" class="sub-menu">
                         <li><a href="dashboards/credit-risk.html" class="sub-link"><i data-lucide="credit-card"></i>
                                 Credit Risk</a></li>
                         <li><a href="dashboards/market-risk.html" class="sub-link"><i data-lucide="trending-down"></i>
@@ -134,13 +130,12 @@
 
                 <!-- Compliance -->
                 <li class="nav-item">
-                    <a href="#" class="nav-link" @click.prevent="toggleMenu('compliance')">
+                    <a href="#" class="nav-link" data-menu="compliance">
                         <i data-lucide="shield-check"></i>
-                        Compliance
-                        <i :data-lucide="expandedMenus.compliance ? 'chevron-down' : 'chevron-right'" class="ml-auto"
+                        Compliance <i data-lucide="chevron-right" class="ml-auto menu-chevron"
                             style="width: 16px; height: 16px;"></i>
                     </a>
-                    <ul v-if="expandedMenus.compliance" class="sub-menu">
+                    <ul style="display:none;" class="sub-menu">
                         <li><a href="dashboards/boz-regulations.html" class="sub-link"><i data-lucide="landmark"></i>
                                 BoZ Regulations</a></li>
                         <li><a href="dashboards/aml-cft.html" class="sub-link"><i data-lucide="shield-ban"></i>
@@ -339,42 +334,96 @@
                 <!-- Tabs -->
                 <div class="tabs-list mb-6">
                     <div class="tab-trigger" :class="{ 'active': activeTab === 'financials' }"
-                        @click="activeTab = 'financials'">Financial Metrics</div>
-                    <div class="tab-trigger" :class="{ 'active': activeTab === 'customers' }"
-                        @click="activeTab = 'customers'">Customer Metrics</div>
+                        @click="activeTab = 'financials'">Financial Performance</div>
+                    <div class="tab-trigger" :class="{ 'active': activeTab === 'operational' }"
+                        @click="activeTab = 'operational'">Operational Efficiency</div>
+                    <div class="tab-trigger" :class="{ 'active': activeTab === 'quality' }"
+                        @click="activeTab = 'quality'">Quality & XP</div>
+                    <div class="tab-trigger" :class="{ 'active': activeTab === 'risk' }" @click="activeTab = 'risk'">
+                        Risk Management</div>
                     <div class="tab-trigger" :class="{ 'active': activeTab === 'compliance' }"
-                        @click="activeTab = 'compliance'">Compliance & Risk</div>
+                        @click="activeTab = 'compliance'">Compliance</div>
                 </div>
 
                 <!-- Financials Tab -->
                 <div v-if="activeTab === 'financials'" class="card p-6 animate-fade-in">
                     <div class="mb-6 pb-4 border-b border-gray-100">
-                        <h3 class="text-lg font-bold">Core Financials</h3>
-                        <p class="text-secondary text-sm">Enter profit and loss summary for the current reporting month.
-                        </p>
+                        <h3 class="text-lg font-bold">Financial Performance Metrics</h3>
+                        <p class="text-secondary text-sm">Enter P&L, balance sheet, and ratio data for the current
+                            period.</p>
                     </div>
+
+                    <h4 class="text-sm font-bold text-primary mb-4 uppercase tracking-wider">ROA & ROE Inputs</h4>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
                         <div class="form-group">
                             <label class="form-label">Net Income (ZMW)</label>
-                            <input type="number" class="form-input" placeholder="0.00">
+                            <input type="number" class="form-input" v-model="formData.financial.netIncome"
+                                placeholder="e.g. 145000000">
                         </div>
                         <div class="form-group">
                             <label class="form-label">Total Assets (ZMW)</label>
-                            <input type="number" class="form-input" placeholder="0.00">
+                            <input type="number" class="form-input" v-model="formData.financial.totalAssets"
+                                placeholder="e.g. 12500000000">
                         </div>
                         <div class="form-group">
+                            <label class="form-label">Total Liabilities (ZMW)</label>
+                            <input type="number" class="form-input" v-model="formData.financial.totalLiabilities"
+                                placeholder="e.g. 10850000000">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Shareholders' Equity (ZMW)</label>
+                            <input type="number" class="form-input" v-model="formData.financial.shEquity"
+                                placeholder="e.g. 1650000000">
+                        </div>
+                    </div>
+
+                    <h4
+                        class="text-sm font-bold text-primary mb-4 uppercase tracking-wider border-t border-gray-100 pt-4">
+                        Margins & Efficiency</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+                        <div class="form-group">
                             <label class="form-label">Interest Income (ZMW)</label>
-                            <input type="number" class="form-input" placeholder="0.00">
+                            <input type="number" class="form-input" v-model="formData.financial.interestIncome"
+                                placeholder="e.g. 1820000000">
                         </div>
                         <div class="form-group">
                             <label class="form-label">Interest Expense (ZMW)</label>
-                            <input type="number" class="form-input" placeholder="0.00">
+                            <input type="number" class="form-input" v-model="formData.financial.interestExpense"
+                                placeholder="e.g. 1140000000">
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Operating Expense (ZMW)</label>
-                            <input type="number" class="form-input" placeholder="0.00">
+                            <label class="form-label">Earning Assets (ZMW)</label>
+                            <input type="number" class="form-input" v-model="formData.financial.earningAssets"
+                                placeholder="e.g. 10000000000">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Operating Income (ZMW)</label>
+                            <input type="number" class="form-input" v-model="formData.financial.operatingIncome"
+                                placeholder="e.g. 1030000000">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Operating Expenses (ZMW)</label>
+                            <input type="number" class="form-input" v-model="formData.financial.operatingExpenses"
+                                placeholder="e.g. 580000000">
                         </div>
                     </div>
+
+                    <h4
+                        class="text-sm font-bold text-primary mb-4 uppercase tracking-wider border-t border-gray-100 pt-4">
+                        Revenue Breakdown</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+                        <div class="form-group">
+                            <label class="form-label">Fee & Commission (ZMW)</label>
+                            <input type="number" class="form-input" v-model="formData.financial.feeCommission"
+                                placeholder="e.g. 245000000">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Other Income (ZMW)</label>
+                            <input type="number" class="form-input" v-model="formData.financial.otherIncome"
+                                placeholder="e.g. 100000000">
+                        </div>
+                    </div>
+
                     <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
                         <button class="btn-outline">
                             <i data-lucide="refresh-ccw" width="16" class="mr-2"></i> Reset
@@ -385,36 +434,264 @@
                     </div>
                 </div>
 
-                <!-- Customers Tab -->
-                <div v-if="activeTab === 'customers'" class="card p-6 animate-fade-in">
+                <!-- Operational Efficiency Tab -->
+                <div v-if="activeTab === 'operational'" class="card p-6 animate-fade-in">
                     <div class="mb-6 pb-4 border-b border-gray-100">
-                        <h3 class="text-lg font-bold">Customer Segment Performance</h3>
-                        <p class="text-secondary text-sm">Updates for customer numbers across various banking tiers.</p>
+                        <h3 class="text-lg font-bold">Operational Efficiency Metrics</h3>
+                        <p class="text-secondary text-sm">Volume, speed, and productivity indicators.</p>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+
+                    <h4 class="text-sm font-bold text-primary mb-4 uppercase tracking-wider">Processing & Branch</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
                         <div class="form-group">
-                            <label class="form-label">Retail Customers</label>
-                            <input type="number" class="form-input" placeholder="Number of accounts">
+                            <label class="form-label">Total Transactions</label>
+                            <input type="number" class="form-input" v-model="formData.operational.totalTransactions"
+                                placeholder="e.g. 12500000">
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Corporate Customers</label>
-                            <input type="number" class="form-input" placeholder="Number of entities">
+                            <label class="form-label">Success Rate (%)</label>
+                            <input type="number" class="form-input" v-model="formData.operational.successRate"
+                                placeholder="e.g. 99.8" step="0.1" max="100">
                         </div>
                         <div class="form-group">
-                            <label class="form-label">SME Customers</label>
-                            <input type="number" class="form-input" placeholder="Number of businesses">
+                            <label class="form-label">Avg Processing Time (sec)</label>
+                            <input type="number" class="form-input" v-model="formData.operational.avgProcessingTime"
+                                placeholder="e.g. 1.2" step="0.1">
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Churn (Monthly)</label>
-                            <input type="number" class="form-input" placeholder="0">
+                            <label class="form-label">Monthly Footfall</label>
+                            <input type="number" class="form-input" v-model="formData.operational.monthlyFootfall"
+                                placeholder="e.g. 450000">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Avg Wait Time (min)</label>
+                            <input type="number" class="form-input" v-model="formData.operational.avgWaitTime"
+                                placeholder="e.g. 8">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Service Time (min)</label>
+                            <input type="number" class="form-input" v-model="formData.operational.serviceTime"
+                                placeholder="e.g. 5">
                         </div>
                     </div>
+
+                    <h4
+                        class="text-sm font-bold text-primary mb-4 uppercase tracking-wider border-t border-gray-100 pt-4">
+                        Digital & People</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+                        <div class="form-group">
+                            <label class="form-label">Active Mobile Users</label>
+                            <input type="number" class="form-input" v-model="formData.operational.activeMobileUsers"
+                                placeholder="e.g. 120000">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Internet Banking Users</label>
+                            <input type="number" class="form-input" v-model="formData.operational.internetBankingUsers"
+                                placeholder="e.g. 45000">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">App Downloads</label>
+                            <input type="number" class="form-input" v-model="formData.operational.appDownloads"
+                                placeholder="e.g. 250000">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Revenue per Employee (ZMW)</label>
+                            <input type="number" class="form-input" v-model="formData.operational.revenuePerEmp"
+                                placeholder="e.g. 1200000">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Accounts per RM</label>
+                            <input type="number" class="form-input" v-model="formData.operational.accountsPerRM"
+                                placeholder="e.g. 450">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Training Hours (Avg)</label>
+                            <input type="number" class="form-input" v-model="formData.operational.trainingHours"
+                                placeholder="e.g. 45">
+                        </div>
+                    </div>
+
                     <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
                         <button class="btn-outline">
                             <i data-lucide="refresh-ccw" width="16" class="mr-2"></i> Reset
                         </button>
                         <button class="btn-primary" @click="applyFilters">
-                            <i data-lucide="save" width="16" class="mr-2"></i> Save Customer Metrics
+                            <i data-lucide="save" width="16" class="mr-2"></i> Save Operational Data
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Quality & Customer Experience Tab -->
+                <div v-if="activeTab === 'quality'" class="card p-6 animate-fade-in">
+                    <div class="mb-6 pb-4 border-b border-gray-100">
+                        <h3 class="text-lg font-bold">Quality & Customer Experience Metrics</h3>
+                        <p class="text-secondary text-sm">Satisfaction scores and service quality indicators.</p>
+                    </div>
+
+                    <h4 class="text-sm font-bold text-primary mb-4 uppercase tracking-wider">Satisfaction & NPS</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+                        <div class="form-group">
+                            <label class="form-label">Overall CSAT (1-5)</label>
+                            <input type="number" class="form-input" v-model="formData.quality.overallCSAT"
+                                placeholder="e.g. 4.2" step="0.1" max="5">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Branch CSAT (1-5)</label>
+                            <input type="number" class="form-input" v-model="formData.quality.branchCSAT"
+                                placeholder="e.g. 4.5" step="0.1" max="5">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Digital CSAT (1-5)</label>
+                            <input type="number" class="form-input" v-model="formData.quality.digitalCSAT"
+                                placeholder="e.g. 4.0" step="0.1" max="5">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">NPS Score (-100 to 100)</label>
+                            <input type="number" class="form-input" v-model="formData.quality.npsScore"
+                                placeholder="e.g. 42">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Retail NPS</label>
+                            <input type="number" class="form-input" v-model="formData.quality.retailNPS"
+                                placeholder="e.g. 38">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Corporate NPS</label>
+                            <input type="number" class="form-input" v-model="formData.quality.corporateNPS"
+                                placeholder="e.g. 55">
+                        </div>
+                    </div>
+
+                    <h4
+                        class="text-sm font-bold text-primary mb-4 uppercase tracking-wider border-t border-gray-100 pt-4">
+                        Service & Complaints</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+                        <div class="form-group">
+                            <label class="form-label">SLA Adherence (%)</label>
+                            <input type="number" class="form-input" v-model="formData.quality.slaAdherence"
+                                placeholder="e.g. 95" max="100">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">First Contact Resolution (%)</label>
+                            <input type="number" class="form-input" v-model="formData.quality.firstContactRes"
+                                placeholder="e.g. 82" max="100">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Error Rate (%)</label>
+                            <input type="number" class="form-input" v-model="formData.quality.errorRate"
+                                placeholder="e.g. 0.5" step="0.1">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Avg Resolution Time (hrs)</label>
+                            <input type="number" class="form-input" v-model="formData.quality.avgResolutionTime"
+                                placeholder="e.g. 24">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Open Tickets</label>
+                            <input type="number" class="form-input" v-model="formData.quality.openTickets"
+                                placeholder="e.g. 45">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Escalation Rate (%)</label>
+                            <input type="number" class="form-input" v-model="formData.quality.escalationRate"
+                                placeholder="e.g. 5" max="100">
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
+                        <button class="btn-outline">
+                            <i data-lucide="refresh-ccw" width="16" class="mr-2"></i> Reset
+                        </button>
+                        <button class="btn-primary" @click="applyFilters">
+                            <i data-lucide="save" width="16" class="mr-2"></i> Save Quality Data
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Risk Management Tab -->
+                <div v-if="activeTab === 'risk'" class="card p-6 animate-fade-in">
+                    <div class="mb-6 pb-4 border-b border-gray-100">
+                        <h3 class="text-lg font-bold">Risk Management Metrics</h3>
+                        <p class="text-secondary text-sm">Credit, market, operational, and liquidity risk indicators.
+                        </p>
+                    </div>
+
+                    <h4 class="text-sm font-bold text-primary mb-4 uppercase tracking-wider">Credit & Market Risk</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+                        <div class="form-group">
+                            <label class="form-label">NPL Ratio (%)</label>
+                            <input type="number" class="form-input" v-model="formData.risk.nplRatio"
+                                placeholder="e.g. 5.2" step="0.1">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">PAR 30 (%)</label>
+                            <input type="number" class="form-input" v-model="formData.risk.par30" placeholder="e.g. 6.5"
+                                step="0.1">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Cost of Risk (%)</label>
+                            <input type="number" class="form-input" v-model="formData.risk.costOfRisk"
+                                placeholder="e.g. 1.2" step="0.1">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">VaR (1-day) (ZMW)</label>
+                            <input type="number" class="form-input" v-model="formData.risk.var"
+                                placeholder="e.g. 1500000">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">FX Exposure (USD)</label>
+                            <input type="number" class="form-input" v-model="formData.risk.fxExposure"
+                                placeholder="e.g. 4200000">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Earnings at Risk (%)</label>
+                            <input type="number" class="form-input" v-model="formData.risk.earningsAtRisk"
+                                placeholder="e.g. 2.5" step="0.1">
+                        </div>
+                    </div>
+
+                    <h4
+                        class="text-sm font-bold text-primary mb-4 uppercase tracking-wider border-t border-gray-100 pt-4">
+                        Operational & Liquidity</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+                        <div class="form-group">
+                            <label class="form-label">Loss Events</label>
+                            <input type="number" class="form-input" v-model="formData.risk.lossEvents"
+                                placeholder="e.g. 3">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Total Fin Loss (ZMW)</label>
+                            <input type="number" class="form-input" v-model="formData.risk.totalFinLoss"
+                                placeholder="e.g. 45000">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Near Misses</label>
+                            <input type="number" class="form-input" v-model="formData.risk.nearMisses"
+                                placeholder="e.g. 12">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">LCR (%)</label>
+                            <input type="number" class="form-input" v-model="formData.risk.lcr" placeholder="e.g. 145"
+                                max="100">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">NSFR (%)</label>
+                            <input type="number" class="form-input" v-model="formData.risk.nsfr" placeholder="e.g. 125"
+                                max="100">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Loan to Deposit Ratio (%)</label>
+                            <input type="number" class="form-input" v-model="formData.risk.ldr" placeholder="e.g. 72"
+                                max="100">
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
+                        <button class="btn-outline">
+                            <i data-lucide="refresh-ccw" width="16" class="mr-2"></i> Reset
+                        </button>
+                        <button class="btn-primary" @click="applyFilters">
+                            <i data-lucide="save" width="16" class="mr-2"></i> Save Risk Data
                         </button>
                     </div>
                 </div>
@@ -422,24 +699,73 @@
                 <!-- Compliance Tab -->
                 <div v-if="activeTab === 'compliance'" class="card p-6 animate-fade-in">
                     <div class="mb-6 pb-4 border-b border-gray-100">
-                        <h3 class="text-lg font-bold">Regulatory & Compliance</h3>
-                        <p class="text-secondary text-sm">Report current ratios and status of outstanding regulatory
-                            items.</p>
+                        <h3 class="text-lg font-bold">Regulatory & Compliance Metrics</h3>
+                        <p class="text-secondary text-sm">Adherence to BoZ regulations and internal policies.</p>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                        <div class="form-group">
-                            <label class="form-label">Liquidity Coverage Ratio (%)</label>
-                            <input type="number" class="form-input" placeholder="100.0">
-                        </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
                         <div class="form-group">
                             <label class="form-label">Capital Adequacy Ratio (%)</label>
-                            <input type="number" class="form-input" placeholder="10.0">
+                            <input type="number" class="form-input" v-model="formData.compliance.capitalAdequacy"
+                                placeholder="e.g. 18.5" step="0.1">
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Pending Audit Issues</label>
-                            <input type="number" class="form-input" placeholder="0">
+                            <label class="form-label">Regulatory Breaches</label>
+                            <input type="number" class="form-input" v-model="formData.compliance.regBreaches"
+                                placeholder="e.g. 0">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Reporting Accuracy (%)</label>
+                            <input type="number" class="form-input" v-model="formData.compliance.reportingAccuracy"
+                                placeholder="e.g. 100" max="100">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">KYC Compliance (%)</label>
+                            <input type="number" class="form-input" v-model="formData.compliance.kycCompliance"
+                                placeholder="e.g. 98.5" step="0.1" max="100">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">STRs Filed</label>
+                            <input type="number" class="form-input" v-model="formData.compliance.strsFiled"
+                                placeholder="e.g. 15">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Txn Monitoring (%)</label>
+                            <input type="number" class="form-input" v-model="formData.compliance.txnMonitoring"
+                                placeholder="e.g. 100" max="100">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Data Breaches</label>
+                            <input type="number" class="form-input" v-model="formData.compliance.dataBreaches"
+                                placeholder="e.g. 0">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Subject Access Requests</label>
+                            <input type="number" class="form-input" v-model="formData.compliance.subjectRequests"
+                                placeholder="e.g. 12">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Policy Acceptance (%)</label>
+                            <input type="number" class="form-input" v-model="formData.compliance.policyAcceptance"
+                                placeholder="e.g. 100" max="100">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Audit Open Findings</label>
+                            <input type="number" class="form-input" v-model="formData.compliance.openFindings"
+                                placeholder="e.g. 8">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">High Risk Findings</label>
+                            <input type="number" class="form-input" v-model="formData.compliance.highRiskOpen"
+                                placeholder="e.g. 1">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Audit Closure Rate (%)</label>
+                            <input type="number" class="form-input" v-model="formData.compliance.closureRate"
+                                placeholder="e.g. 92" max="100">
                         </div>
                     </div>
+
                     <div class="flex items-start gap-3 p-4 bg-yellow-50 border border-yellow-100 rounded-xl mb-6">
                         <i data-lucide="alert-circle" class="text-yellow-600 mt-1"></i>
                         <div>
@@ -552,6 +878,8 @@
 
         <!-- Data & App Scripts -->
         <script src="js/data.js"></script>
+        <script src="js/storage.js"></script>
+        <script src="js/simple-menu.js"></script>
         <script src="js/app.js"></script>
 </body>
 

@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title id="page-title">ROA & ROE Analysis - NatSave Bank KPIs</title>
+    <title id="page-title">Employee Productivity - NatSave Bank KPIs</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -21,7 +21,7 @@
 </head>
 
 <body>
-    <div id="app" v-cloak>
+    <div id="app">
         <div class="app-container">
             <!-- Sidebar -->
             <aside class="sidebar">
@@ -46,47 +46,47 @@
 
                     <!-- Financial Performance -->
                     <li class="nav-item">
-                        <a href="#" class="nav-link active" @click.prevent="toggleMenu('financial')">
+                        <a href="#" class="nav-link active" data-menu="financial">
                             <i data-lucide="dollar-sign"></i>
                             Financial Performance
-                            <i :data-lucide="expandedMenus.financial ? 'chevron-down' : 'chevron-right'" class="ml-auto"
+                            <i data-lucide="chevron-right" class="ml-auto menu-chevron"
                                 style="width: 16px; height: 16px;"></i>
                         </a>
-                        <ul v-if="expandedMenus.financial" class="sub-menu">
+                        <ul style="display:none;" class="sub-menu">
                             <li><a href="roa-roe.html" class="sub-link"
-                                    :class="{ 'active': currentPage === 'roa_roe' }"><i data-lucide="trending-up"></i>
+                                   ><i data-lucide="trending-up"></i>
                                     ROA & ROE</a></li>
-                            <li><a href="nim.html" class="sub-link" :class="{ 'active': currentPage === 'nim' }"><i
+                            <li><a href="nim.html" class="sub-link"><i
                                         data-lucide="percent"></i> Net Interest Margin</a></li>
                             <li><a href="cost-income.html" class="sub-link"
-                                    :class="{ 'active': currentPage === 'cost_income' }"><i
+                                   ><i
                                         data-lucide="calculator"></i> Cost-to-Income Ratio</a></li>
                             <li><a href="revenue.html" class="sub-link"
-                                    :class="{ 'active': currentPage === 'revenue' }"><i data-lucide="bar-chart-3"></i>
+                                   ><i data-lucide="bar-chart-3"></i>
                                     Revenue Analysis</a></li>
                         </ul>
                     </li>
 
                     <!-- Operational Efficiency -->
                     <li class="nav-item">
-                        <a href="#" class="nav-link" @click.prevent="toggleMenu('operational')">
+                        <a href="#" class="nav-link" data-menu="operational">
                             <i data-lucide="gauge"></i>
                             Operational Efficiency
-                            <i :data-lucide="expandedMenus.operational ? 'chevron-down' : 'chevron-right'"
+                            <i data-lucide="chevron-right" class="menu-chevron"
                                 class="ml-auto" style="width: 16px; height: 16px;"></i>
                         </a>
-                        <ul v-if="expandedMenus.operational" class="sub-menu">
+                        <ul style="display:none;" class="sub-menu">
                             <li><a href="transaction-processing.html" class="sub-link"
-                                    :class="{ 'active': currentPage === 'transaction_processing' }"><i
+                                   ><i
                                         data-lucide="zap"></i> Transaction Processing</a></li>
                             <li><a href="branch-performance.html" class="sub-link"
-                                    :class="{ 'active': currentPage === 'branch_performance' }"><i
+                                   ><i
                                         data-lucide="building-2"></i> Branch Performance</a></li>
                             <li><a href="digital-usage.html" class="sub-link"
-                                    :class="{ 'active': currentPage === 'digital_usage' }"><i
+                                   ><i
                                         data-lucide="smartphone"></i> Digital Channel Usage</a></li>
                             <li><a href="employee-productivity.html" class="sub-link"
-                                    :class="{ 'active': currentPage === 'employee_productivity' }"><i
+                                   ><i
                                         data-lucide="users-round"></i> Employee Productivity</a>
                             </li>
                         </ul>
@@ -94,23 +94,23 @@
 
                     <!-- Quality & Customer Experience -->
                     <li class="nav-item">
-                        <a href="#" class="nav-link" @click.prevent="toggleMenu('quality')">
+                        <a href="#" class="nav-link" data-menu="quality">
                             <i data-lucide="heart-handshake"></i>
                             Quality & Experience
-                            <i :data-lucide="expandedMenus.quality ? 'chevron-down' : 'chevron-right'" class="ml-auto"
+                            <i data-lucide="chevron-right" class="ml-auto menu-chevron"
                                 style="width: 16px; height: 16px;"></i>
                         </a>
-                        <ul v-if="expandedMenus.quality" class="sub-menu">
+                        <ul style="display:none;" class="sub-menu">
                             <li><a href="customer-satisfaction.html" class="sub-link"
-                                    :class="{ 'active': currentPage === 'customer_satisfaction' }"><i
+                                   ><i
                                         data-lucide="smile"></i> Customer Satisfaction</a></li>
-                            <li><a href="nps.html" class="sub-link" :class="{ 'active': currentPage === 'nps' }"><i
+                            <li><a href="nps.html" class="sub-link"><i
                                         data-lucide="award"></i> Net Promoter Score</a></li>
                             <li><a href="service-quality.html" class="sub-link"
-                                    :class="{ 'active': currentPage === 'service_quality' }"><i data-lucide="star"></i>
+                                   ><i data-lucide="star"></i>
                                     Service Quality</a></li>
                             <li><a href="complaint-resolution.html" class="sub-link"
-                                    :class="{ 'active': currentPage === 'complaint_resolution' }"><i
+                                   ><i
                                         data-lucide="message-square"></i> Complaint Resolution</a>
                             </li>
                         </ul>
@@ -118,48 +118,48 @@
 
                     <!-- Risk Management -->
                     <li class="nav-item">
-                        <a href="#" class="nav-link" @click.prevent="toggleMenu('risk')">
+                        <a href="#" class="nav-link" data-menu="risk">
                             <i data-lucide="shield-alert"></i>
                             Risk Management
-                            <i :data-lucide="expandedMenus.risk ? 'chevron-down' : 'chevron-right'" class="ml-auto"
+                            <i data-lucide="chevron-right" class="ml-auto menu-chevron"
                                 style="width: 16px; height: 16px;"></i>
                         </a>
-                        <ul v-if="expandedMenus.risk" class="sub-menu">
+                        <ul style="display:none;" class="sub-menu">
                             <li><a href="credit-risk.html" class="sub-link"
-                                    :class="{ 'active': currentPage === 'credit_risk' }"><i
+                                   ><i
                                         data-lucide="credit-card"></i> Credit Risk</a></li>
                             <li><a href="market-risk.html" class="sub-link"
-                                    :class="{ 'active': currentPage === 'market_risk' }"><i
+                                   ><i
                                         data-lucide="trending-down"></i> Market Risk</a></li>
                             <li><a href="operational-risk.html" class="sub-link"
-                                    :class="{ 'active': currentPage === 'operational_risk' }"><i
+                                   ><i
                                         data-lucide="alert-triangle"></i> Operational Risk</a></li>
                             <li><a href="liquidity-risk.html" class="sub-link"
-                                    :class="{ 'active': currentPage === 'liquidity_risk' }"><i
+                                   ><i
                                         data-lucide="droplet"></i> Liquidity Risk</a></li>
                         </ul>
                     </li>
 
                     <!-- Compliance -->
                     <li class="nav-item">
-                        <a href="#" class="nav-link" @click.prevent="toggleMenu('compliance')">
+                        <a href="#" class="nav-link" data-menu="compliance">
                             <i data-lucide="shield-check"></i>
                             Compliance
-                            <i :data-lucide="expandedMenus.compliance ? 'chevron-down' : 'chevron-right'"
+                            <i data-lucide="chevron-right" class="menu-chevron"
                                 class="ml-auto" style="width: 16px; height: 16px;"></i>
                         </a>
-                        <ul v-if="expandedMenus.compliance" class="sub-menu">
+                        <ul style="display:none;" class="sub-menu">
                             <li><a href="boz-regulations.html" class="sub-link"
-                                    :class="{ 'active': currentPage === 'boz_regulations' }"><i
+                                   ><i
                                         data-lucide="landmark"></i> BoZ Regulations</a></li>
                             <li><a href="aml-cft.html" class="sub-link"
-                                    :class="{ 'active': currentPage === 'aml_cft' }"><i data-lucide="shield-ban"></i>
+                                   ><i data-lucide="shield-ban"></i>
                                     AML/CFT</a></li>
                             <li><a href="data-protection.html" class="sub-link"
-                                    :class="{ 'active': currentPage === 'data_protection' }"><i data-lucide="lock"></i>
+                                   ><i data-lucide="lock"></i>
                                     Data Protection</a></li>
                             <li><a href="audit-compliance.html" class="sub-link"
-                                    :class="{ 'active': currentPage === 'audit_compliance' }"><i
+                                   ><i
                                         data-lucide="clipboard-check"></i> Audit Compliance</a></li>
                         </ul>
                     </li>
@@ -217,7 +217,11 @@
                                 <option>FY 2023</option>
                                 <option>FY 2022</option>
                             </select>
-                            <button class="btn-primary">
+                            <a href="../index.html?view=capture&tab=operational" class="btn-primary"
+                                style="text-decoration: none; display: flex; align-items: center;">
+                                <i data-lucide="edit-3" width="16" class="mr-2"></i> Edit Data
+                            </a>
+                            <button class="btn-outline">
                                 <i data-lucide="download" width="16" class="mr-2"></i> Export
                             </button>
                         </div>
@@ -301,6 +305,8 @@
 
     <!-- Scripts -->
     <script src="../js/dashboard-data.js"></script>
+    <script src="../js/storage.js"></script>
+    <script src="../js/simple-menu.js"></script>
     <script>
         const { createApp } = Vue;
 
@@ -327,7 +333,28 @@
                 const dashboardKey = this.getDashboardKey();
                 // Set current page for active link styling
                 this.currentPage = dashboardKey;
-                this.dashboard = DASHBOARD_DATA[dashboardKey] || {};
+
+                // Load base mock data
+                let dashboardData = DASHBOARD_DATA[dashboardKey] || {};
+
+                // MERGE: Load saved data from localStorage
+                if (window.StorageManager) {
+                    const savedAll = window.StorageManager.getAllKPIData();
+                    const categoryKey = this.getCategoryKey(dashboardData.category);
+
+                    if (savedAll && savedAll[categoryKey]) {
+                        const savedCategory = savedAll[categoryKey];
+
+                        // Mapping for Employee Productivity
+                        if (dashboardKey === 'employee_productivity') {
+                            if (savedCategory.revenuePerEmp) this.updateKPI(dashboardData, 'Revenue per Emp', 'ZMW ' + savedCategory.revenuePerEmp);
+                            if (savedCategory.accountsPerRM) this.updateKPI(dashboardData, 'Accounts per RN', savedCategory.accountsPerRM); // Note data.js has 'RN' typo in label
+                            if (savedCategory.trainingHours) this.updateKPI(dashboardData, 'Training Hours', savedCategory.trainingHours + 'h');
+                        }
+                    }
+                }
+
+                this.dashboard = dashboardData;
 
                 // Auto-expand correct menu
                 const category = this.dashboard.category;
@@ -343,6 +370,23 @@
                 });
             },
             methods: {
+                getCategoryKey(categoryName) {
+                    if (!categoryName) return '';
+                    if (categoryName.includes('Financial')) return 'financial';
+                    if (categoryName.includes('Operational')) return 'operational';
+                    if (categoryName.includes('Quality')) return 'quality';
+                    if (categoryName.includes('Risk')) return 'risk';
+                    if (categoryName.includes('Compliance')) return 'compliance';
+                    return '';
+                },
+                updateKPI(data, label, newValue) {
+                    if (!newValue) return;
+                    const kpi = data.kpis.find(k => k.label === label);
+                    if (kpi) {
+                        kpi.value = newValue; // Update value
+                        kpi.status = 'on_target'; // Reset status
+                    }
+                },
                 toggleMenu(menuKey) {
                     this.expandedMenus[menuKey] = !this.expandedMenus[menuKey];
                     // Only reinitialize icons in next tick

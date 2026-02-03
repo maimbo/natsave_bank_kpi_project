@@ -2,6 +2,11 @@
 
 A lightweight, static implementation of the Natsave Bank KPI Dashboard using Vue.js (CDN), plain HTML, and CSS.
 
+## 🚀 Quick Start
+**New to this project?** Read [`GETTING_STARTED.md`](GETTING_STARTED.md) first.
+
+**For comprehensive documentation**, see the [`docs/`](docs/) folder.
+
 ## Features
 - **Executive Dashboard**: Real-time view of ROA, NIM, Active Customers, and Compliance.
 - **Interactive Drill-downs**: Click on any KPI card to view detailed breakdowns (Level 2 & Level 3 data).
@@ -32,4 +37,10 @@ This project is static-ready. You can deploy it to:
 - `css/styles.css`: All styling, including Natsave corporate theme.
 - `js/app.js`: Main Vue application logic.
 - `js/data.js`: Mock data repository.
+- `dashboards/`: Individual KPI dashboard pages (20 files).
+- `docs/`: Comprehensive project documentation.
 - `assets/`: Images and static resources.
+
+## ⚠️ Known Gap
+The project has 20 dashboard VIEW pages but lacks complete data entry forms. See [`docs/DATA_ENTRY_STATUS.md`](docs/DATA_ENTRY_STATUS.md) for details.
+
