@@ -1,0 +1,103 @@
+@startuml 03 - Authentication Sequence Diagram
+
+!theme plain
+skinparam defaultFontName Inter
+skinparam backgroundColor #F8FAFC
+skinparam sequenceArrowColor #00AE57
+skinparam sequenceLifeLineBorderColor #0F5132
+skinparam sequenceParticipantBorderColor #0F5132
+skinparam sequenceParticipantBackgroundColor #FFFFFF
+skinparam noteBackgroundColor #F1F5F9
+skinparam noteBorderColor #CBD5E1
+
+title "Sequence Diagram 03 — User Authentication Flow\nModule: Authentication | File: endpoints/auth.php, helpers/Auth.php"
+
+actor "User (Browser)" as User
+participant "Browser DOM\nlogin.html" as DOM
+participant "js/api.js\n+post('/auth/login', body)" as ApiJs
+participant "api/index.php\nRouter::dispatch()" as Router
+participant "endpoints/auth.php\nAuthEndpoint" as AuthEP
+participant "helpers/Auth.php\n+login(user, pass)\n+createSession()\n+requireLogin()" as Auth
+participant "helpers/Response.php\n+json(data, status)\n+error(msg, status)" as Resp
+database "MySQL\nusers table" as DB
+
+== Login Request ==
+
+User -> DOM : Enter username + password\nClick "Sign In"
+DOM -> ApiJs : post('/auth/login', { username, password })
+ApiJs -> Router : POST /api/auth/login\nContent-Type: application/json
+Router -> Router : Parse URI → auth endpoint
+Router -> AuthEP : dispatch()
+
+AuthEP -> AuthEP : Validator::required(['username','password'])\nValidator::sanitize(input)
+
+alt Input invalid
+    AuthEP -> Resp : error("Missing credentials", 422)
+    Resp -> ApiJs : HTTP 422
+    ApiJs -> DOM : Show validation error
+end
+
+AuthEP -> Auth : login(username, password)
+Auth -> DB : SELECT id, password_hash, role, is_active\nFROM users WHERE username = :username
+
+alt User not found / inactive
+    DB -> Auth : empty result
+    Auth -> Resp : error("Invalid credentials", 401)
+    Resp -> ApiJs : HTTP 401
+    ApiJs -> DOM : "Incorrect username or password"
+end
+
+DB -> Auth : { id, password_hash, role, full_name }
+Auth -> Auth : password_verify(input, hash)
+
+alt Password mismatch
+    Auth -> Resp : error("Invalid credentials", 401)
+    Resp -> ApiJs : HTTP 401
+    ApiJs -> DOM : "Incorrect username or password"
+end
+
+Auth -> DB : UPDATE users SET last_login = NOW()\nWHERE id = :id
+Auth -> Auth : createSession(userId, role)\n$_SESSION['user_id'] = id\n$_SESSION['role'] = role
+Auth -> Resp : json({ user: {...}, role: role })
+Resp -> ApiJs : HTTP 200 + JSON
+ApiJs -> DOM : Store role in localStorage
+
+== Redirect ==
+
+DOM -> DOM : window.location = 'index.html'
+
+== Subsequent Authenticated Request ==
+
+User -> DOM : Navigates to a dashboard
+DOM -> ApiJs : get('/dashboard', { period })
+ApiJs -> Router : GET /api/dashboard?period=FY2024
+Router -> Auth : requireLogin()
+Auth -> Auth : Check $_SESSION['user_id']
+alt Session missing/expired
+    Auth -> Resp : error("Unauthenticated", 401)
+    Resp -> ApiJs : HTTP 401
+    ApiJs -> DOM : Redirect to login.html
+end
+Auth -> Router : session valid, userId = X, role = ANALYST
+
+== Logout ==
+
+User -> DOM : Clicks "Sign Out"
+DOM -> ApiJs : post('/auth/logout', {})
+ApiJs -> Router : POST /api/auth/logout
+Router -> Auth : logout()
+Auth -> Auth : session_destroy()
+Auth -> Resp : json({ success: true })
+Resp -> ApiJs : HTTP 200
+ApiJs -> DOM : Redirect to login.html
+
+note over Auth
+  helpers/Auth.php
+  ─────────────────────
+  Input:  username (string), password (string)
+  Queries: users table
+  Output: session variables + JSON user object
+  Roles:  ADMIN > MANAGER > ANALYST > VIEWER
+end note
+
+@enduml

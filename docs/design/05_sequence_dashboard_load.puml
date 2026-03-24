@@ -1,0 +1,97 @@
+@startuml 05 - Dashboard Load Sequence
+
+!theme plain
+skinparam defaultFontName Inter
+skinparam backgroundColor #F8FAFC
+skinparam sequenceArrowColor #00AE57
+skinparam sequenceLifeLineBorderColor #0F5132
+skinparam sequenceParticipantBackgroundColor #FFFFFF
+skinparam noteBackgroundColor #F1F5F9
+
+title "Sequence Diagram 05 — Sub-Dashboard Page Load Flow\nModule: KPI Dashboard Display | Files: dashboards/*.html, js/api.js, endpoints/*.php"
+
+actor "User" as User
+participant "Browser\ndashboards/nim.html\nVue.createApp()" as Page
+participant "js/api.js\n+get(endpoint, params)" as ApiJs
+participant "api/index.php\nRouter" as Router
+participant "endpoints/financial.php\n+handleGet(kpi, period)" as FinEP
+participant "FinancialRepo.php\n+getNim(periodCode)\n+getFinancialTrends()" as FinRepo
+participant "helpers/Response.php\n+json(data, 200)" as Resp
+database "MySQL" as DB
+
+User -> Page : Navigate to nim.html
+Page -> Page : Vue.createApp({\n  data() → { dashboard: null, isLoading: true }\n})
+Page -> Page : mounted() lifecycle hook fires
+
+== Parallel Init ==
+
+par Load period selector
+    Page -> ApiJs : get('/periods')
+    ApiJs -> Router : GET /api/periods
+    Router -> DB : SELECT * FROM reporting_periods\nWHERE is_active = 1\nORDER BY fiscal_year DESC
+    DB -> Router : [ { period_code, fiscal_year, ... } ]
+    Router -> Resp : json(periods)
+    Resp -> Page : populate period dropdown (default: latest FY)
+else Load initial KPI data
+    Page -> ApiJs : get('/financial', { kpi: 'nim', period: 'FY2024' })
+    ApiJs -> Router : GET /api/financial?kpi=nim&period=FY2024
+    Router -> Router : parse → kpi='nim', period='FY2024'
+    Router -> FinEP : handleGet('nim', 'FY2024')
+    FinEP -> FinRepo : getNim('FY2024')
+
+    ' Main NIM record
+    FinRepo -> DB : SELECT n.*, p.period_code,\n  n.nim_percentage, n.net_interest_income\nFROM fp_nim n\nJOIN reporting_periods p ON n.period_id = p.id\nWHERE p.period_code = 'FY2024'
+    DB -> FinRepo : { nim: 6.8, interest_income: 1820000000, ... }
+
+    ' Yield breakdown
+    FinRepo -> DB : SELECT * FROM fp_nim_yield_breakdown\nWHERE nim_id = :nimId
+    DB -> FinRepo : [{ instrument_name, yield_pct, volume }]
+
+    ' Cost breakdown
+    FinRepo -> DB : SELECT * FROM fp_nim_cost_breakdown\nWHERE nim_id = :nimId
+    DB -> FinRepo : [{ funding_source, cost_pct, volume }]
+
+    FinEP -> FinRepo : getFinancialTrends('nim', 'nim_percentage', ['FY2024-Q1','FY2024-Q2','FY2024-Q3','FY2024-Q4'])
+    FinRepo -> DB : SELECT p.period_code, t.metric_value\nFROM kpi_trend_snapshots t\nJOIN kpi_dashboards d ON t.dashboard_id = d.id\nJOIN reporting_periods p ON t.period_id = p.id\nWHERE d.code = 'nim'\n  AND t.metric_name = 'nim_percentage'\n  AND p.period_code IN ('FY2024-Q1','FY2024-Q2','FY2024-Q3','FY2024-Q4')\nORDER BY p.start_date
+    DB -> FinRepo : [{ Q1: 6.5 }, { Q2: 6.62 }, { Q3: 6.72 }, { Q4: 6.80 }]
+
+    FinRepo -> FinEP : aggregated dashboard object
+    FinEP -> Resp : json({\n  kpi: 'nim',\n  label: 'Net Interest Margin',\n  value: '6.8%',\n  target: '7.0%',\n  trend: [...],\n  yieldBreakdown: [...],\n  costBreakdown: [...]\n})
+    Resp -> ApiJs : HTTP 200 + JSON
+    ApiJs -> Page : resolve Promise
+end
+
+== Render ==
+
+Page -> Page : this.dashboard = apiData\nthis.isLoading = false
+Page -> Page : Vue reactive render:\n  — KPI stat cards update with real values\n  — ApexCharts.updateSeries(trend data)\n  — Breakdown charts update
+Page -> User : Dashboard fully loaded
+
+== Period Filter Change ==
+
+User -> Page : Change period dropdown → "FY2024-Q3"
+Page -> Page : watch: { selectedPeriod(newVal) }\ntriggered with 'FY2024-Q3'
+Page -> ApiJs : get('/financial', { kpi: 'nim', period: 'FY2024-Q3' })
+ApiJs -> Router : GET /api/financial?kpi=nim&period=FY2024-Q3
+Router -> FinEP : handleGet('nim', 'FY2024-Q3')
+FinEP -> FinRepo : getNim('FY2024-Q3')
+FinRepo -> DB : ... (same queries, different period_code)
+DB -> FinRepo : Q3 data
+FinRepo -> Page : updated JSON
+Page -> Page : charts animate to new data
+Page -> User : Charts update with Q3 values
+
+note left of FinRepo
+  FinancialRepo::getNim()
+  Input: period_code (string)
+  Queries:
+    — fp_nim (main record + generated nim_percentage)
+    — fp_nim_yield_breakdown (FK: nim.id)
+    — fp_nim_cost_breakdown (FK: nim.id)
+    — kpi_trend_snapshots (trend series for charts)
+  Output: array {
+    value, target, trend[], yieldBreakdown[], costBreakdown[]
+  }
+end note
+
+@enduml

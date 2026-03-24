@@ -1,0 +1,158 @@
+@startuml 07 - UX and Screen Flow
+
+!theme plain
+skinparam defaultFontName Inter
+skinparam backgroundColor #F8FAFC
+skinparam stateBackgroundColor #FFFFFF
+skinparam stateBorderColor #00AE57
+skinparam stateArrowColor #00AE57
+skinparam noteBackgroundColor #F1F5F9
+skinparam noteBorderColor #CBD5E1
+
+title "UX Flow 07 — Screen Navigation & Interaction Flow\nNatsave Bank KPI Dashboard Application"
+
+[*] --> LoginPage
+
+state "login.html\nLogin Screen" as LoginPage {
+    state "Form: Username + Password" as LForm
+    state "Error State" as LError
+    LForm --> LError : Wrong credentials → HTTP 401
+    LError --> LForm : User corrects input
+}
+
+LoginPage --> ExecutiveDash : Successful auth → redirect
+
+state "index.html\nExecutive Overview Dashboard" as ExecutiveDash {
+    state "5 Category Score Cards\n(Financial / Ops / Quality / Risk / Compliance)" as Scorecards
+    state "Revenue Trend Chart\n(12-month bar chart)" as RevenueChart
+    state "Quick Actions Panel" as QuickActions
+    state "Global Sidebar\nKPI Category Navigation" as Sidebar
+    
+    Scorecards --> RevenueChart : page loads (API call)
+    RevenueChart --> Scorecards : period filter changed
+    Scorecards --> QuickActions : hover/click
+}
+
+ExecutiveDash --> DataCaptureModal : Click "Edit Data" / "+" button
+ExecutiveDash --> FinancialCat : Sidebar: Financial Performance
+ExecutiveDash --> OperationalCat : Sidebar: Operational Efficiency
+ExecutiveDash --> QualityCat : Sidebar: Quality & Experience
+ExecutiveDash --> RiskCat : Sidebar: Risk Management
+ExecutiveDash --> ComplianceCat : Sidebar: Compliance
+
+' ─── FINANCIAL PERFORMANCE ───
+state "Financial Performance Category" as FinancialCat {
+    state "ROA & ROE\nroa-roe.html" as ROA_ROE
+    state "Net Interest Margin\nnim.html" as NIM
+    state "Cost-to-Income\ncost-income.html" as CIR
+    state "Revenue Analysis\nrevenue.html" as Revenue
+}
+
+' ─── OPERATIONAL ───
+state "Operational Efficiency Category" as OperationalCat {
+    state "Transaction Processing\ntransaction-processing.html" as TxnProc
+    state "Branch Performance\nbranch-performance.html" as BranchPerf
+    state "Digital Usage\ndigital-usage.html" as DigitalUsage
+    state "Employee Productivity\nemployee-productivity.html" as EmpProd
+}
+
+' ─── QUALITY ───
+state "Quality & Experience Category" as QualityCat {
+    state "Customer Satisfaction\ncustomer-satisfaction.html" as CSAT
+    state "Net Promoter Score\nnps.html" as NPS
+    state "Service Quality\nservice-quality.html" as SvcQuality
+    state "Complaint Resolution\ncomplaint-resolution.html" as Complaints
+}
+
+' ─── RISK ───
+state "Risk Management Category" as RiskCat {
+    state "Credit Risk\ncredit-risk.html" as CreditRisk
+    state "Market Risk\nmarket-risk.html" as MarketRisk
+    state "Operational Risk\noperational-risk.html" as OpRisk
+    state "Liquidity Risk\nliquidity-risk.html" as LiqRisk
+}
+
+' ─── COMPLIANCE ───
+state "Compliance Category" as ComplianceCat {
+    state "BoZ Regulations\nboz-regulations.html" as BoZ
+    state "AML / CFT\naml-cft.html" as AML
+    state "Data Protection\ndata-protection.html" as DataProt
+    state "Audit Compliance\naudit-compliance.html" as Audit
+}
+
+' Each sub-dashboard common interactions
+state "KPI Sub-Dashboard\n(any dashboard page)" as SubDash {
+    state "4 KPI Stat Cards (top row)" as StatCards
+    state "Quarterly Trend Chart (ApexCharts)\n— line chart, area or bar" as TrendChart
+    state "Breakdown Chart\n— donut / horizontal bar" as BreakdownChart
+    state "Data Table\n(quarterly comparisons)" as DataTable
+    state "Period Filter\n(year/quarter selector)" as PeriodFilter
+
+    StatCards --> TrendChart : load sequence
+    TrendChart --> BreakdownChart : parallel render
+    BreakdownChart --> DataTable : below charts
+    PeriodFilter --> StatCards : filter change → API reload
+}
+
+ROA_ROE --> SubDash
+NIM --> SubDash
+CIR --> SubDash
+Revenue --> SubDash
+TxnProc --> SubDash
+BranchPerf --> SubDash
+DigitalUsage --> SubDash
+EmpProd --> SubDash
+CSAT --> SubDash
+NPS --> SubDash
+SvcQuality --> SubDash
+Complaints --> SubDash
+CreditRisk --> SubDash
+MarketRisk --> SubDash
+OpRisk --> SubDash
+LiqRisk --> SubDash
+BoZ --> SubDash
+AML --> SubDash
+DataProt --> SubDash
+Audit --> SubDash
+
+SubDash --> DataCaptureModal : Click "Edit Data"
+SubDash --> ExecutiveDash : Click breadcrumb "Dashboard"
+
+' ─── DATA CAPTURE MODAL ───
+state "Data Capture Modal\n(Slide-over panel)" as DataCaptureModal {
+    state "Step 1: Select KPI Category + Period" as DCStep1
+    state "Step 2: Fill in metric fields\n(numeric inputs per KPI)" as DCStep2
+    state "Step 3: Review + Submit" as DCStep3
+    state "Saving..." as DCSaving
+    state "Success Toast" as DCSuccess
+    state "Validation Error" as DCError
+
+    DCStep1 --> DCStep2 : period selected
+    DCStep2 --> DCStep3 : all fields filled
+    DCStep2 --> DCError : required field empty
+    DCError --> DCStep2 : correct field
+    DCStep3 --> DCSaving : click Save
+    DCSaving --> DCSuccess : HTTP 200
+    DCSaving --> DCError : HTTP 422 (validation)
+    DCSuccess --> SubDash : data reload triggered\nmodal closes
+}
+
+note right of SubDash
+  Each sub-dashboard:
+  1. On load: GET /api/{category}?kpi=x&period=FY2024
+  2. On period change: reload same endpoint
+  3. "Edit Data" opens slide-over modal
+  4. Breadcrumb navigates back to index.html
+  5. Sidebar is shared — same nav on all pages
+end note
+
+note bottom of DataCaptureModal
+  Form inputs vary by KPI module:
+  Financial → numeric (ZMW amounts)
+  Operational → integers (transactions, users)
+  Quality → CSAT scores (0-5), integers (NPS counts)
+  Risk → decimals (%, ZMW)
+  Compliance → integers (findings, breaches)
+end note
+
+@enduml

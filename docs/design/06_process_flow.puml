@@ -1,0 +1,126 @@
+@startuml 06 - KPI Reporting Process Flow
+
+!theme plain
+skinparam defaultFontName Inter
+skinparam backgroundColor #F8FAFC
+skinparam ActivityBackgroundColor #FFFFFF
+skinparam ActivityBorderColor #00AE57
+skinparam ActivityArrowColor #00AE57
+skinparam partitionBorderColor #0F5132
+skinparam partitionFontColor #0F5132
+skinparam noteBackgroundColor #F1F5F9
+
+title "Process Flow 06 — KPI Reporting & Data Capture Process\nCovers all 5 modules: Financial, Operational, Quality, Risk, Compliance"
+
+start
+
+partition "Period Management (ADMIN)" {
+    :System Administrator opens Settings;
+    :Create/confirm reporting period\n(e.g. FY2024-Q4);
+    :Mark period as ACTIVE in reporting_periods;
+    :Notify analysts by role;
+}
+
+partition "Data Collection Phase (ANALYST/MANAGER)" {
+    :Finance Analyst receives notification;
+    :Navigate to relevant KPI dashboard;
+    :Click "Edit Data" → open data capture panel;
+    
+    fork
+        :Financial Performance
+        ——————————————————
+        • Net Income
+        • Total Assets
+        • Interest Income / Expense
+        • Operating Income / Expenses
+        • Revenue breakdown;
+    fork again
+        :Operational Efficiency
+        ——————————————————
+        • Transaction volumes & success rates
+        • Branch footfall & wait times
+        • Digital users (mobile / IB / USSD)
+        • Employee headcount;
+    fork again
+        :Quality & Experience
+        ——————————————————
+        • CSAT scores (branch / digital)
+        • NPS promoters / passives / detractors
+        • SLA adherence %
+        • Complaint counts & resolution times;
+    fork again
+        :Risk Management
+        ——————————————————
+        • Loan portfolio & NPLs by sector
+        • VaR & FX net open positions
+        • Operational loss events
+        • HQLA & deposit data (LCR/NSFR);
+    fork again
+        :Compliance
+        ——————————————————
+        • Tier 1 & 2 capital / RWA (CAR)
+        • KYC compliance by segment
+        • Data breaches & DSARs
+        • Audit findings open/closed;
+    end fork
+    
+    :Submit form to POST /api/{module};
+    :Server validates input;
+    
+    if (Validation passes?) then (Yes)
+        :Save to domain table via Repo;
+        :Update kpi_trend_snapshots;
+        :Write audit_log entry;
+        :Return HTTP 200 + success;
+        :Dashboard auto-refreshes;
+    else (No)
+        :Return HTTP 422 + field errors;
+        :Highlight invalid fields;
+        :Analyst corrects & resubmits;
+        backward: Resubmit;
+    endif
+}
+
+partition "Review Phase (MANAGER)" {
+    :Manager reviews each KPI dashboard;
+    :Compare actual vs target values;
+    
+    if (KPI is BELOW target?) then (Yes)
+        :Flag for escalation;
+        :Add commentary note;
+        :Notify relevant head of department;
+    else (On/above target)
+        :Mark as reviewed;
+    endif
+}
+
+partition "Executive Reporting (ADMIN/MANAGER)" {
+    :Navigate to Executive Dashboard (index.html);
+    :SELECT period → GET /api/dashboard;
+    :System queries v_financial_summary,\nv_risk_summary, v_compliance_summary;
+    :Render aggregate KPI scorecard;
+    :Export to PDF / Excel (future feature);
+    :Distribute board-pack report;
+}
+
+partition "Period Close (ADMIN)" {
+    :Mark period as closed (is_active = 0);
+    :Archive data remains queryable;
+    :Open next reporting period;
+}
+
+stop
+
+note right
+  APIs involved:
+  GET  /api/periods         — load available periods
+  GET  /api/dashboard       — executive summary
+  GET  /api/financial       — KPI details + trends
+  POST /api/financial       — save financial data
+  GET|POST /api/operational — operational data
+  GET|POST /api/quality     — quality/CX data
+  GET|POST /api/risk        — risk data
+  GET|POST /api/compliance  — compliance data
+end note
+
+@enduml

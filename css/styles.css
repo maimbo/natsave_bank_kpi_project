@@ -44,6 +44,13 @@ body {
     min-height: 100vh;
 }
 
+/* App container used in sub-dashboard pages */
+.app-container {
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+}
+
 /* Sidebar */
 .sidebar {
     width: var(--sidebar-width);
@@ -999,7 +1006,7 @@ body {
     margin-bottom: 24px;
 }
 
-@media (max-width: 1400px) {
+@media (max-width: 1200px) {
     .kpi-grid {
         grid-template-columns: repeat(2, 1fr);
         /* 2x2 on laptops */

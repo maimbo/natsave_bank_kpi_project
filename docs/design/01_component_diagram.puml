@@ -1,0 +1,162 @@
+@startuml 01 - System Component Diagram
+!theme plain
+skinparam componentStyle rectangle
+skinparam defaultFontName Inter
+skinparam backgroundColor #F8FAFC
+skinparam component {
+    BackgroundColor #FFFFFF
+    BorderColor #00AE57
+    FontColor #1E293B
+}
+skinparam package {
+    BackgroundColor #F0FDF4
+    BorderColor #0F5132
+}
+skinparam database {
+    BackgroundColor #FFF7ED
+    BorderColor #F59E0B
+}
+skinparam note {
+    BackgroundColor #F1F5F9
+    BorderColor #CBD5E1
+}
+
+title "Natsave Bank KPI — System Component Architecture"
+
+actor "Finance Analyst\n(Data Entry)" as Analyst
+actor "Executive\n(View only)" as Exec
+actor "Risk/Compliance\nOfficer" as Risk
+
+package "Browser (Client Layer)" {
+    component "index.html\n[Executive Dashboard]" as IndexPage
+    component "dashboards/*.html\n[20 KPI Sub-Dashboards]" as DashPages
+    component "login.html\n[Authentication]" as LoginPage
+
+    component "js/api.js\n[fetch() wrapper]\n--\n+get(endpoint, params)\n+post(endpoint, body)" as ApiJs
+    component "js/dashboard-data.js\n[Fallback Mock Data]" as MockData
+    component "vue.js (CDN)\n[Reactive UI]" as Vue
+    component "apexcharts (CDN)\n[Charts]" as Charts
+    component "css/styles.css\n[Design System]" as Styles
+}
+
+package "Web Server (PHP Layer)" {
+    component "api/index.php\n[Front Controller / Router]\n--\nParses URI, validates auth,\ndispatches to endpoints" as Router
+
+    package "Endpoint Files" {
+        component "endpoints/auth.php\nPOST /api/auth/login\nPOST /api/auth/logout" as AuthEP
+        component "endpoints/dashboard.php\nGET /api/dashboard" as DashEP
+        component "endpoints/financial.php\nGET|POST /api/financial" as FinEP
+        component "endpoints/operational.php\nGET|POST /api/operational" as OpsEP
+        component "endpoints/quality.php\nGET|POST /api/quality" as QualEP
+        component "endpoints/risk.php\nGET|POST /api/risk" as RiskEP
+        component "endpoints/compliance.php\nGET|POST /api/compliance" as CompEP
+        component "endpoints/periods.php\nGET /api/periods" as PeriodsEP
+    }
+
+    package "Repository Layer" {
+        component "FinancialRepo.php\n--\n+getRoaRoe(period)\n+saveRoaRoe(data)\n+getNim(period)\n+getRevenue(period)\n+getFinancialTrends()" as FinRepo
+        component "OperationalRepo.php\n--\n+getTransactions(period)\n+getBranchPerf(period)\n+getDigitalUsage(period)" as OpsRepo
+        component "QualityRepo.php\n--\n+getCsat(period)\n+getNps(period)\n+getComplaints(period)" as QualRepo
+        component "RiskRepo.php\n--\n+getCreditRisk(period)\n+getMarketRisk(period)\n+getLiquidityRisk(period)" as RiskRepo
+        component "ComplianceRepo.php\n--\n+getBozRegulations(period)\n+getAmlCft(period)\n+getAuditCompliance(period)" as CompRepo
+    }
+
+    package "Helpers & Config" {
+        component "config/db.php\n[PDO Singleton]\n--\n+connect(): PDO" as DB
+        component "config/cors.php\n[CORS Headers]" as Cors
+        component "helpers/Auth.php\n--\n+requireLogin()\n+login(user,pass)\n+logout()" as AuthHelper
+        component "helpers/Response.php\n--\n+json(data, 200)\n+error(msg, 400)" as Response
+        component "helpers/Validator.php\n--\n+sanitize(input)\n+required(fields)" as Validator
+        component "helpers/AuditLogger.php\n--\n+log(user,action,table,old,new)" as AuditLog
+    }
+}
+
+database "MySQL 8.0\nnatsave_kpi_db" as MySQL {
+    component "reporting_periods\nkpi_categories\nkpi_dashboards" as ConfigTables
+    component "fp_* tables\n(Financial — 7 tables)" as FPTables
+    component "oe_* tables\n(Operational — 5 tables)" as OETables
+    component "qe_* tables\n(Quality — 5 tables)" as QETables
+    component "rm_* tables\n(Risk — 7 tables)" as RMTables
+    component "comp_* tables\n(Compliance — 6 tables)" as CompTables
+    component "users\naudit_log\nkpi_trend_snapshots" as InfraTables
+    component "Views:\nv_financial_summary\nv_risk_summary\nv_compliance_summary" as Views
+}
+
+' User interactions
+Exec --> IndexPage
+Analyst --> DashPages
+Analyst --> IndexPage
+Risk --> DashPages
+LoginPage --> IndexPage : redirects after auth
+
+' Front-end wiring
+IndexPage --> ApiJs
+DashPages --> ApiJs
+IndexPage --> MockData : fallback
+IndexPage --> Vue
+DashPages --> Vue
+Vue --> Charts
+IndexPage --> Styles
+DashPages --> Styles
+
+' API calls
+ApiJs --> Router : HTTP GET/POST
+Router --> Cors
+Router --> AuthHelper : verify session
+Router --> AuthEP
+Router --> DashEP
+Router --> FinEP
+Router --> OpsEP
+Router --> QualEP
+Router --> RiskEP
+Router --> CompEP
+Router --> PeriodsEP
+
+' Endpoints → Repositories
+DashEP --> FinRepo
+DashEP --> OpsRepo
+DashEP --> QualRepo
+DashEP --> RiskRepo
+DashEP --> CompRepo
+FinEP --> FinRepo
+OpsEP --> OpsRepo
+QualEP --> QualRepo
+RiskEP --> RiskRepo
+CompEP --> CompRepo
+PeriodsEP --> DB
+
+' Repos → Config/Helpers
+FinRepo --> DB
+OpsRepo --> DB
+QualRepo --> DB
+RiskRepo --> DB
+CompRepo --> DB
+FinRepo --> AuditLog
+OpsRepo --> AuditLog
+FinRepo --> Response
+AuthHelper --> DB
+
+' DB → Tables
+DB --> MySQL
+FinRepo --> FPTables
+OpsRepo --> OETables
+QualRepo --> QETables
+RiskRepo --> RMTables
+CompRepo --> CompTables
+DB --> InfraTables
+DashEP --> Views
+
+note right of Router
+  Routing convention:
+  GET  /api/{module}?kpi=x&period=FY2024
+  POST /api/{module}
+  Auth checked on all POST routes
+end note
+
+note bottom of MySQL
+  All domain tables FK to reporting_periods.id
+  All write tables FK to users.id (captured_by)
+  Generated columns auto-compute ratios (ROA, NIM, CIR, NPS...)
+end note
+
+@enduml

@@ -1,0 +1,112 @@
+@startuml 04 - Data Capture Sequence Diagram
+
+!theme plain
+skinparam defaultFontName Inter
+skinparam backgroundColor #F8FAFC
+skinparam sequenceArrowColor #00AE57
+skinparam sequenceLifeLineBorderColor #0F5132
+skinparam sequenceParticipantBackgroundColor #FFFFFF
+skinparam noteBackgroundColor #F1F5F9
+skinparam noteBorderColor #CBD5E1
+
+title "Sequence Diagram 04 — KPI Data Capture Flow\nModule: Financial Data Entry | Feature: Edit Data Modal"
+
+actor "Finance Analyst" as Analyst
+participant "Dashboard Page\n(*.html)\nVue.js component" as Page
+participant "Data Capture Modal\n(index.html #data-capture)" as Modal
+participant "js/api.js\n+post(endpoint, body)" as ApiJs
+participant "api/index.php\nRouter" as Router
+participant "helpers/Auth.php\n+requireLogin()\n+getRole()" as Auth
+participant "helpers/Validator.php\n+required(fields)\n+numeric(value, min, max)" as Validator
+participant "endpoints/financial.php\nFinancialEndpoint\n+handlePost()" as FinEP
+participant "FinancialRepo.php\n+saveRoaRoe(data, userId)\n+logTrendSnapshot()" as FinRepo
+participant "helpers/AuditLogger.php\n+log(userId, action, table, id, old, new)" as AuditLog
+database "MySQL" as DB
+
+== Open Data Capture ==
+
+Analyst -> Page : Click "Edit Data" button
+Page -> Modal : Show data entry sheet (slideover)
+Modal -> ApiJs : get('/periods') — load available periods
+ApiJs -> Router : GET /api/periods
+Router -> DB : SELECT * FROM reporting_periods WHERE is_active=1
+DB -> Router : period list
+Router -> Modal : [{ id, period_code, fiscal_year, ... }]
+Modal -> Modal : Populate period dropdown
+Modal -> Modal : Pre-fill current values (from Vue state)
+
+== Submit Form ==
+
+Analyst -> Modal : Fill form fields\nSelect Period: FY2024\nKPI: ROA & ROE\nNet Income: 145,200,000\nTotal Assets: 12,550,000,000\nTotal Liabilities: 10,900,000,000\nShareholders Equity: 1,650,000,000
+Analyst -> Modal : Click "Save Changes"
+Modal -> ApiJs : post('/financial', {\n  kpi: 'roa_roe',\n  period: 'FY2024',\n  netIncome: 145200000,\n  totalAssets: 12550000000,\n  totalLiabilities: 10900000000,\n  shEquity: 1650000000\n})
+
+ApiJs -> Router : POST /api/financial\n(JSON body)
+Router -> Auth : requireLogin()
+Auth -> Auth : Check session
+alt Not authenticated
+    Auth -> ApiJs : HTTP 401
+    ApiJs -> Modal : Show "Please log in" error
+end
+Auth -> Router : userId = 1, role = ANALYST
+
+Router -> FinEP : handlePost(body, userId)
+FinEP -> Validator : required(['kpi','period','netIncome','totalAssets','shEquity'])
+FinEP -> Validator : numeric(netIncome, 0, null)
+FinEP -> Validator : numeric(totalAssets, 0, null)
+alt Validation failed
+    Validator -> FinEP : ['field' => 'error message']
+    FinEP -> ApiJs : HTTP 422 + { errors }
+    ApiJs -> Modal : Highlight invalid fields
+end
+Validator -> FinEP : cleaned data
+
+FinEP -> FinRepo : saveRoaRoe(cleanData, periodCode, userId)
+
+FinRepo -> DB : SELECT id FROM fp_roa_roe\nWHERE period_id = (SELECT id FROM reporting_periods\nWHERE period_code = 'FY2024')
+alt Record exists (UPDATE)
+    DB -> FinRepo : existing record { id, net_income, ... }
+    FinRepo -> AuditLog : log(userId,'UPDATE','fp_roa_roe', id, oldValues, newValues)
+    AuditLog -> DB : INSERT audit_log(...)
+    FinRepo -> DB : UPDATE fp_roa_roe SET net_income=:net, ...\nWHERE id = :id
+else Record not found (INSERT)
+    FinRepo -> DB : INSERT INTO fp_roa_roe\n(period_id, net_income, ...)\nSELECT rp.id, :net_income, ...\nFROM reporting_periods rp\nWHERE period_code = 'FY2024'
+    DB -> FinRepo : new id = 5
+    FinRepo -> AuditLog : log(userId,'INSERT','fp_roa_roe', 5, null, newValues)
+    AuditLog -> DB : INSERT audit_log(...)
+end
+
+FinRepo -> FinRepo : logTrendSnapshot(dashboardCode, periodId, 'roa_percentage', computedValue)
+FinRepo -> DB : INSERT INTO kpi_trend_snapshots ...\nON DUPLICATE KEY UPDATE metric_value = :val
+DB -> FinRepo : OK
+
+FinRepo -> FinEP : { success: true, id: 5 }
+FinEP -> ApiJs : HTTP 200 + { success, message: "KPI data saved successfully", id }
+
+== UI Update ==
+
+ApiJs -> Page : trigger data reload
+Page -> ApiJs : get('/financial', { kpi: 'roa_roe', period: 'FY2024' })
+ApiJs -> Router : GET /api/financial?kpi=roa_roe&period=FY2024
+Router -> FinRepo : getRoaRoe('FY2024')
+FinRepo -> DB : SELECT r.*, p.period_code FROM fp_roa_roe r\nJOIN reporting_periods p ON r.period_id=p.id\nWHERE p.period_code='FY2024'
+DB -> FinRepo : updated record (generated columns computed)
+FinRepo -> ApiJs : JSON with updated ROA=1.16, ROE=8.8...
+ApiJs -> Page : Update Vue state
+Page -> Page : Re-render KPI cards + charts with new data
+Modal -> Modal : Close modal / show success toast
+
+note over FinRepo
+  FinancialRepo.php
+  ─────────────────────────
+  Input: cleaned form data + period code + userId
+  Queries: fp_roa_roe, reporting_periods (FK lookup via subquery)
+  Output: record id (int)
+  Side effects:
+    — audit_log row written
+    — kpi_trend_snapshots updated
+  Generated columns (MySQL auto-computes):
+    roa_percentage, roe_percentage, equity_multiplier
+end note
+
+@enduml

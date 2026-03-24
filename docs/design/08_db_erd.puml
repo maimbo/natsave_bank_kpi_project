@@ -1,0 +1,291 @@
+@startuml 08 - Database ERD
+
+!theme plain
+skinparam defaultFontName Inter
+skinparam backgroundColor #F8FAFC
+skinparam entityBorderColor #00AE57
+skinparam entityBackgroundColor #FFFFFF
+skinparam entityFontColor #1E293B
+skinparam arrowColor #64748B
+skinparam noteBackgroundColor #FFF7ED
+skinparam noteBorderColor #F59E0B
+
+title "ERD 08 — Entity Relationship Diagram\nNatsave Bank KPI Database (natsave_kpi_db)"
+
+' ─── CORE REFERENCE ENTITIES ───
+entity "reporting_periods" as RP {
+    *id : INT (PK)
+    --
+    period_code : VARCHAR(10) UNIQUE
+    period_type : ENUM(ANNUAL,QUARTERLY,MONTHLY)
+    *fiscal_year : YEAR
+    quarter : TINYINT (1-4)
+    month : TINYINT (1-12)
+    start_date : DATE
+    end_date : DATE
+    is_active : TINYINT(1)
+}
+
+entity "kpi_categories" as KC {
+    *id : INT (PK)
+    --
+    *code : VARCHAR(50) UNIQUE
+    *name : VARCHAR(100)
+    icon : VARCHAR(50)
+    sort_order : INT
+}
+
+entity "kpi_dashboards" as KD {
+    *id : INT (PK)
+    --
+    *category_id : INT (FK→kpi_categories)
+    *code : VARCHAR(50) UNIQUE
+    *title : VARCHAR(150)
+    html_file : VARCHAR(100)
+    sort_order : INT
+}
+
+entity "users" as USR {
+    *id : INT (PK)
+    --
+    *username : VARCHAR(100) UNIQUE
+    *password_hash : VARCHAR(255)
+    *full_name : VARCHAR(200)
+    *email : VARCHAR(200) UNIQUE
+    *role : ENUM(ADMIN,MANAGER,ANALYST,VIEWER)
+    department : VARCHAR(150)
+    is_active : TINYINT(1)
+    last_login : DATETIME
+}
+
+entity "audit_log" as AL {
+    *id : BIGINT (PK)
+    --
+    user_id : INT (FK→users)
+    *action : VARCHAR(50)
+    table_name : VARCHAR(100)
+    record_id : INT
+    old_values : JSON
+    new_values : JSON
+    ip_address : VARCHAR(45)
+    created_at : DATETIME
+}
+
+entity "kpi_trend_snapshots" as KTS {
+    *id : INT (PK)
+    --
+    *dashboard_id : INT (FK→kpi_dashboards)
+    *period_id : INT (FK→reporting_periods)
+    *metric_name : VARCHAR(150)
+    metric_value : DECIMAL(18,6)
+    recorded_at : DATETIME
+    UNIQUE(dashboard_id, period_id, metric_name)
+}
+
+' ─── FINANCIAL PERFORMANCE ───
+entity "fp_roa_roe" as ROA {
+    *id : INT (PK)
+    --
+    *period_id : INT (FK→reporting_periods)
+    net_income : DECIMAL(18,2)
+    total_assets : DECIMAL(18,2)
+    total_liabilities : DECIMAL(18,2)
+    shareholders_equity : DECIMAL(18,2)
+    operating_income : DECIMAL(18,2)
+    [GEN] roa_percentage : DECIMAL(8,4)
+    [GEN] roe_percentage : DECIMAL(8,4)
+    [GEN] equity_multiplier : DECIMAL(8,4)
+    target_roa : DECIMAL(8,4)
+    target_roe : DECIMAL(8,4)
+    captured_by : INT (FK→users)
+}
+
+entity "fp_nim" as NIM {
+    *id : INT (PK)
+    --
+    *period_id : INT (FK→reporting_periods)
+    interest_income : DECIMAL(18,2)
+    interest_expense : DECIMAL(18,2)
+    earning_assets : DECIMAL(18,2)
+    [GEN] net_interest_income : DECIMAL(18,2)
+    [GEN] nim_percentage : DECIMAL(8,4)
+    target_nim : DECIMAL(8,4)
+    captured_by : INT (FK→users)
+}
+
+entity "fp_nim_yield_breakdown" as NIMY {
+    *id : INT (PK)
+    --
+    *nim_id : INT (FK→fp_nim)
+    instrument_name : VARCHAR(100)
+    yield_percentage : DECIMAL(8,4)
+    volume : DECIMAL(18,2)
+}
+
+entity "fp_nim_cost_breakdown" as NIMC {
+    *id : INT (PK)
+    --
+    *nim_id : INT (FK→fp_nim)
+    funding_source : VARCHAR(100)
+    cost_percentage : DECIMAL(8,4)
+    volume : DECIMAL(18,2)
+}
+
+entity "fp_cost_income" as CIR {
+    *id : INT (PK)
+    --
+    *period_id : INT (FK→reporting_periods)
+    operating_income : DECIMAL(18,2)
+    operating_expenses : DECIMAL(18,2)
+    staff_costs : DECIMAL(18,2)
+    it_infrastructure : DECIMAL(18,2)
+    marketing_costs : DECIMAL(18,2)
+    [GEN] cir_percentage : DECIMAL(8,4)
+    target_cir : DECIMAL(8,4)
+    captured_by : INT (FK→users)
+}
+
+entity "fp_revenue" as REV {
+    *id : INT (PK)
+    --
+    *period_id : INT (FK→reporting_periods)
+    interest_revenue : DECIMAL(18,2)
+    fee_commission : DECIMAL(18,2)
+    other_income : DECIMAL(18,2)
+    [GEN] total_revenue : DECIMAL(18,2)
+    target_total : DECIMAL(18,2)
+    captured_by : INT (FK→users)
+}
+
+entity "fp_revenue_by_channel" as REVC {
+    *id : INT (PK)
+    --
+    *revenue_id : INT (FK→fp_revenue)
+    channel_name : VARCHAR(100)
+    amount : DECIMAL(18,2)
+}
+
+' ─── RISK MANAGEMENT (abbreviated) ───
+entity "rm_credit_risk" as CR {
+    *id : INT (PK)
+    --
+    *period_id : INT (FK→reporting_periods)
+    total_loan_portfolio : DECIMAL(18,2)
+    non_performing_loans : DECIMAL(18,2)
+    par_30_amount : DECIMAL(18,2)
+    loan_loss_provisions : DECIMAL(18,2)
+    [GEN] npl_ratio_pct : DECIMAL(8,4)
+    [GEN] coverage_ratio_pct : DECIMAL(8,4)
+    target_npl_pct : DECIMAL(8,4)
+    captured_by : INT (FK→users)
+}
+
+entity "rm_credit_by_sector" as CRS {
+    *id : INT (PK)
+    --
+    *credit_risk_id : INT (FK→rm_credit_risk)
+    sector_name : VARCHAR(100)
+    loan_amount : DECIMAL(18,2)
+    npl_amount : DECIMAL(18,2)
+    npl_pct : DECIMAL(8,4)
+}
+
+entity "rm_liquidity_risk" as LIQ {
+    *id : INT (PK)
+    --
+    *period_id : INT (FK→reporting_periods)
+    hqla_amount : DECIMAL(18,2)
+    net_cash_outflows_30d : DECIMAL(18,2)
+    total_deposits : DECIMAL(18,2)
+    total_loans : DECIMAL(18,2)
+    [GEN] lcr_pct : DECIMAL(8,4)
+    [GEN] nsfr_pct : DECIMAL(8,4)
+    [GEN] loan_to_deposit_pct : DECIMAL(8,4)
+    captured_by : INT (FK→users)
+}
+
+' ─── COMPLIANCE (abbreviated) ───
+entity "comp_boz_regulations" as BOZ {
+    *id : INT (PK)
+    --
+    *period_id : INT (FK→reporting_periods)
+    tier1_capital : DECIMAL(18,2)
+    tier2_capital : DECIMAL(18,2)
+    risk_weighted_assets : DECIMAL(18,2)
+    [GEN] car_pct : DECIMAL(8,4)
+    [GEN] tier1_ratio_pct : DECIMAL(8,4)
+    regulatory_breaches : INT
+    target_car_pct : DECIMAL(8,4)
+    captured_by : INT (FK→users)
+}
+
+entity "comp_aml_cft" as AML {
+    *id : INT (PK)
+    --
+    *period_id : INT (FK→reporting_periods)
+    total_customers : INT
+    kyc_compliant_customers : INT
+    [GEN] kyc_compliance_pct : DECIMAL(8,4)
+    strs_filed : INT
+    captured_by : INT (FK→users)
+}
+
+entity "comp_aml_kyc_segments" as AMLK {
+    *id : INT (PK)
+    --
+    *aml_id : INT (FK→comp_aml_cft)
+    segment : VARCHAR(100)
+    total : INT
+    compliant : INT
+    [GEN] kyc_pct : DECIMAL(8,4)
+}
+
+' ─── RELATIONSHIPS ───
+
+' Config hierarchy
+KC ||--o{ KD : "has"
+KD ||--o{ KTS : "tracks trends for"
+RP ||--o{ KTS : "period snapshot"
+
+' Core anchor relationships
+RP ||--|| ROA : "one period"
+RP ||--|| NIM : "one period"
+RP ||--|| CIR : "one period"
+RP ||--|| REV : "one period"
+RP ||--|| CR  : "one period"
+RP ||--|| LIQ : "one period"
+RP ||--|| BOZ : "one period"
+RP ||--|| AML : "one period"
+
+' Detail/breakdown child tables
+NIM ||--o{ NIMY : "yields"
+NIM ||--o{ NIMC : "costs"
+REV ||--o{ REVC : "channels"
+CR  ||--o{ CRS  : "by sector"
+AML ||--o{ AMLK : "by segment"
+
+' User tracking
+USR ||--o{ ROA : "captured_by"
+USR ||--o{ NIM : "captured_by"
+USR ||--o{ CIR : "captured_by"
+USR ||--o{ REV : "captured_by"
+USR ||--o{ CR  : "captured_by"
+USR ||--o{ LIQ : "captured_by"
+USR ||--o{ BOZ : "captured_by"
+USR ||--o{ AML : "captured_by"
+USR ||--o{ AL  : "performed by"
+
+note bottom of ROA
+  [GEN] = MySQL Generated Column
+  Auto-computed on INSERT, stored physically.
+  No PHP calculation required.
+  Example: roa_percentage = (net_income / total_assets) * 100
+end note
+
+note right of KTS
+  This table powers ALL ApexCharts time-series.
+  One row per: (dashboard + period + metric_name)
+  Allows flexible trend tracking for any metric.
+end note
+
+@enduml

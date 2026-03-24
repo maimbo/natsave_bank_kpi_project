@@ -1,0 +1,87 @@
+@startuml 02 - Data Flow Diagram
+
+!theme plain
+skinparam defaultFontName Inter
+skinparam backgroundColor #F8FAFC
+skinparam ArrowColor #00AE57
+skinparam actorBorderColor #0F5132
+
+title "Natsave Bank KPI — Data Flow Diagram\nLevel 1: System Data Flows"
+
+actor "Finance Analyst" as Analyst
+actor "Executive / Viewer" as Viewer
+
+rectangle "Browser (Client)" {
+    rectangle "Data Entry Form\n(index.html)" as Form
+    rectangle "Dashboard View\n(*.html)" as Dashboard
+    rectangle "js/api.js" as ApiClient
+    rectangle "Vue.js State" as VState
+}
+
+rectangle "PHP API Server" {
+    rectangle "Router\n(api/index.php)" as Router
+    rectangle "Input Validation\n(Validator.php)" as Validate
+    rectangle "Authentication\n(Auth.php)" as Auth
+    rectangle "[Domain]Repo.php" as Repo
+    rectangle "AuditLogger.php" as Audit
+    rectangle "Response.php" as Respond
+}
+
+rectangle "MySQL Database" {
+    database "Domain Fact Tables\n(fp_*, oe_*, qe_, rm_*, comp_*)" as FactDB
+    database "reporting_periods\nkpi_dashboards" as RefDB
+    database "audit_log" as AuditDB
+    database "kpi_trend_snapshots" as TrendDB
+    database "Views\n(v_financial_summary etc)" as ViewDB
+}
+
+' ─── READ FLOW (Executive viewing dashboard) ───
+Viewer --> Dashboard : 1. Opens page
+Dashboard --> ApiClient : 2. Calls api.get('/dashboard')
+ApiClient --> Router : 3. HTTP GET /api/dashboard?period=FY2024
+Router --> Auth : 4. Verify session
+Auth --> Router : 5. OK (viewer role)
+Router --> Repo : 6. dispatch to DashboardEndpoint → Repos
+Repo --> RefDB : 7. Load active period IDs
+Repo --> ViewDB : 8. Query v_financial_summary, v_risk_summary
+Repo --> TrendDB : 9. Load quarterly trend snapshots
+Repo --> Respond : 10. Build JSON response
+Respond --> ApiClient : 11. Return JSON payload
+ApiClient --> VState : 12. Update Vue reactive state
+VState --> Dashboard : 13. Re-render charts & KPI cards
+
+' ─── WRITE FLOW (Analyst entering data) ───
+Analyst --> Form : A. Opens data capture panel
+Form --> ApiClient : B. Submits form (POST)
+ApiClient --> Router : C. HTTP POST /api/financial
+Router --> Auth : D. Verify session (ANALYST+ required)
+Auth --> Router : E. OK
+Router --> Validate : F. Sanitise & validate input fields
+Validate --> Router : G. Cleaned data
+Router --> Repo : H. Call FinancialRepo.saveRoaRoe(data)
+Repo --> FactDB : I. INSERT/UPDATE fp_roa_roe (period_id via subquery)
+Repo --> Audit : J. Log change (old vs new JSON)
+Audit --> AuditDB : K. INSERT into audit_log
+Repo --> Respond : L. Return { success, id }
+Respond --> ApiClient : M. 200 OK + confirmation
+ApiClient --> VState : N. Reload dashboard data
+VState --> Dashboard : O. Updated metrics displayed
+
+note right of Auth
+  Roles:
+  VIEWER - GET only
+  ANALYST - GET + POST own dept
+  MANAGER - GET + POST all
+  ADMIN - full access
+end note
+
+note bottom of FactDB
+  Generated columns auto-compute:
+  ROA = net_income / total_assets
+  NIM = (int_income - int_expense) / earning_assets
+  CIR = operating_expenses / operating_income
+  NPS = (promoters - detractors) / total * 100
+  All calculations in MySQL, not PHP
+end note
+
+@enduml
